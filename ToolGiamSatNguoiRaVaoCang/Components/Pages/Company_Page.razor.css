@@ -1,0 +1,43 @@
+﻿::deep.search-box-template {
+    display: flex;
+    gap: 5px;
+    width: 400px;
+    float: right;
+    justify-content:flex-end;
+}
+::deep.save-layout {
+    display: flex;
+    gap: 5px;
+    width: 400px;
+}
+::deep.priority-info {
+    background-color: var(--bs-info);
+    float:left;
+}
+::deep.priority-warning {
+    background-color: var(--bs-orange);
+    float:left;
+}
+::deep.priority-danger {
+    background-color: var(--bs-red);
+    float: left;
+}
+::deep.status-icon {
+    width: 0.5rem;
+    height: 0.5rem;
+}
+::deep.status-icon-new {
+    background-color: var(--bs-cyan);
+}
+
+::deep.status-icon-rejected {
+    background-color: var(--bs-red);
+}
+
+::deep.status-icon-postponed {
+    background-color: var(--bs-gray-600);
+}
+
+::deep.status-icon-fixed {
+    background-color: var(--bs-green);
+}

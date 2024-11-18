@@ -1,0 +1,216 @@
+﻿@page "/company"
+@inject ICompanyRepository _companyRepository
+@rendermode InteractiveServer
+@inject ApplicationDbContext _db
+
+<h5 style="margin: 0;padding: 0;">Danh sách nhà thầu</h5>
+
+<EditForm Model="Company"
+          OnValidSubmit="SaveItem" OnInvalidSubmit="InvalidSaveItem"
+          FormName="EditForm"
+          Context="EditFormContext">
+    <DataAnnotationsValidator />
+    <DxFormLayout CssClass="w-100">
+        <DxFormLayoutGroup Caption="Form cập nhật công ty"
+                           ExpandButtonDisplayMode="GroupExpandButtonDisplayMode.Start"
+                           AnimationType="LayoutAnimationType.Slide"
+                           ColSpanLg="12">
+            <DxFormLayoutItem Caption="Mã nhà thầu" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxTextBox @bind-Text="@Company.Code"
+                           NullText="Nhập mã số"
+                           BindValueMode="BindValueMode.OnInput"
+                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                           CssClass="cw-480"
+                           InputId="tbCompanyID" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Tên nhà thầu" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="2">
+                <DxTextBox @bind-Text="@Company.Name"
+                           NullText="Nhập tên công ty"
+                           BindValueMode="BindValueMode.OnInput"
+                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                           CssClass="cw-480"
+                           InputId="tbCompanyName" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Mô tả" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxTextBox @bind-Text="@Company.Description"
+                           NullText="Nhập mô tả"
+                           BindValueMode="BindValueMode.OnInput"
+                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                           InputId="tbCompanyDescription"
+                           CssClass="cw-480" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Loại khu vực" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxComboBox Data="@Priorities"
+                            @bind-Value="@Company.PriorityId"
+                            TextFieldName="@nameof(IssuePriority.Name)"
+                            NullText="Chọn loại khu vực"
+                            SearchMode="@ListSearchMode.AutoSearch"
+                            SearchFilterCondition="@ListSearchFilterCondition.Contains"
+                            ListRenderMode="ListRenderMode.Virtual"
+                            CssClass="cw-480"
+                            InputId="cbVirtualScrolling" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem ColSpanMd="3">
+                <div class="save-layout">
+                    <div>
+                        <DxButton CssClass="w-100"
+                                  RenderStyle="ButtonRenderStyle.Info"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  SubmitFormOnClick="true"
+                                  Text="Save" />
+                    </div>
+                    <div>
+                        <DxButton CssClass="w-100"
+                                  RenderStyle="ButtonRenderStyle.Info"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  Text="Clear"
+                                  Click="Clear" />
+                    </div>
+                </div>
+            </DxFormLayoutItem>
+        </DxFormLayoutGroup>
+    </DxFormLayout>
+</EditForm>
+
+
+<DxLoadingPanel Visible="IsProcessing"
+                IsContentBlocked="true"
+                ApplyBackgroundShading="true"
+                IndicatorAreaVisible="false"
+                Text="Fetching Data...">
+    <DxGrid Data="Companies"
+            CssClass="ch-360"
+            ShowSearchBox="true"
+            ShowGroupPanel="true"
+            PagerPosition="GridPagerPosition.Bottom"
+            PagerVisible="true"
+            PageSizeSelectorVisible="true"
+            PageSizeSelectorAllRowsItemVisible="false"
+            PageSizeSelectorItems="@(new int[] { 25, 50, 75 })"
+            PageSize="25"
+            PagerVisibleNumericButtonCount="5"
+            PagerNavigationMode="PagerNavigationMode.Auto"
+            SelectionMode="GridSelectionMode.Multiple"
+            SelectAllCheckboxMode="GridSelectAllCheckboxMode.AllPages">
+        <Columns>
+            <DxGridDataColumn FieldName="Code" Caption="Mã nhà thầu" />
+            <DxGridDataColumn FieldName="Name" Caption="Tên nhà thầu" />
+            <DxGridDataColumn FieldName="Description" Caption="Mô tả" />
+            <DxGridDataColumn FieldName="Status" Caption="Trạng thái" TextAlignment="GridTextAlignment.Left">
+                <CellDisplayTemplate>
+                    @GetIssueStatusIcon(((Company)context.DataItem).Status,
+                             ((Company)context.DataItem).CreateDate,
+                             ((Company)context.DataItem).UpdateDate)
+                </CellDisplayTemplate>
+            </DxGridDataColumn>
+            <DxGridDataColumn FieldName="PriorityId" Caption="Ưu tiên">
+                <CellDisplayTemplate>
+                    @GetIssuePriorityIconHtml((context.DataItem as Company).Priority)
+                </CellDisplayTemplate>
+            </DxGridDataColumn>
+            <DxGridCommandColumn Caption="Action">
+                <DxButton IconCssClass="bi bi-trash" />
+            </DxGridCommandColumn>
+        </Columns>
+        <SearchBoxTemplate>
+            <div class="search-box-template">
+                <div class="item">
+                    <DxButton SizeMode="SizeMode.Medium" Click="ExportXlsx_Click" Text="Export XLSX" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Info" />
+                </div>
+                <div>
+                    <DxTextBox NullText="Tìm kiếm"
+                               BindValueMode="BindValueMode.OnInput"
+                               TextChanged="(string? v)=>context.SearchText = v"
+                               ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                </div>
+            </div>
+        </SearchBoxTemplate>
+    </DxGrid>
+</DxLoadingPanel>
+
+
+
+@code {
+    IGrid Grid { get; set; }
+    bool ExportSelectedRowsOnly { get; set; }
+    public bool IsProcessing { get; set; }
+    private IEnumerable<Company> Companies { get; set; } = new List<Company>();
+    private List<IssuePriority> Priorities { get; set; } = new List<IssuePriority>();
+    private Company Company { get; set; } = new Company();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadCompanies();
+        }
+    }
+    private async Task LoadCompanies()
+    {
+        IsProcessing = true;
+        StateHasChanged();
+        await Task.Delay(1500);
+        Companies = await _companyRepository.GetAllAsync();
+        Priorities = await _db.IssuePriority.ToListAsync();
+        IsProcessing = false;
+        StateHasChanged();
+    }
+    private async Task SaveItem()
+    {
+
+    }
+    private async Task InvalidSaveItem()
+    {
+
+    }
+    private async Task Clear()
+    {
+
+    }
+    async Task ExportXlsx_Click()
+    {
+        await Grid.ExportToXlsxAsync("ExportResult", new GridXlExportOptions()
+            {
+                ExportSelectedRowsOnly = ExportSelectedRowsOnly,
+            });
+    }
+    public MarkupString GetIssuePriorityIconHtml(IssuePriority priority)
+    {
+        string priorytyClass = "warning";
+        string title = "Trung bình";
+        if (priority.Name == "Cao")
+        {
+            priorytyClass = "danger";
+            title = "Cao";
+        }
+        if (priority.Name == "Thấp")
+        {
+            priorytyClass = "info";
+            title = "Thấp";
+        }
+        string html = string.Format("<span class='badge priority-{0}' title='Ưu tiên {1}' b-v2bewct92u>{1}</span>", priorytyClass, title);
+        return new MarkupString(html);
+    }
+    public MarkupString GetIssueStatusIcon(bool status, DateTime createDate, DateTime updateDate)
+    {
+        string statusIconName = "";
+        if (status)
+        {
+            if (createDate == updateDate)
+            {
+                statusIconName = "new";
+            }
+            else
+            {
+                statusIconName = "fixed";
+            }
+        }
+        else
+        {
+            statusIconName = "rejected";
+        }
+        string html = string.Format("<span class='status-icon status-icon-{0} me-1 rounded-circle d-inline-block' b-v2bewct92u></span> {0}",
+        statusIconName);
+        return new MarkupString(html);
+    }
+
+}

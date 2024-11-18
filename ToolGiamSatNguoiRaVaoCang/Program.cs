@@ -5,6 +5,8 @@ using ToolGiamSatNguoiRaVaoCang.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ToolGiamSatNguoiRaVaoCang.Repository.IRepository;
+using ToolGiamSatNguoiRaVaoCang.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +41,11 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IZoneRepository, ZoneRepository>();
+builder.Services.AddScoped<IZoneTypeRepository, ZoneTypeRepository>();
+builder.Services.AddScoped<IShiftRepository, ShiftRepository>();
+builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

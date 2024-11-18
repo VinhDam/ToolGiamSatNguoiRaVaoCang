@@ -1,84 +1,151 @@
-﻿@implements IDisposable
+﻿@using DevExpress.Blazor.Internal
+@using ToolGiamSatNguoiRaVaoCang.Utilities
+@implements IDisposable
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 
+
 <div class="page">
-    <Drawer DrawerHeader="drawerHeader" DrawerFooter="drawerFooter">
-        <DrawerBody>
-            <div class="w-100">
-                <NavMenu></NavMenu>
+    <div class="header">
+        <DxMenu CollapseItemsToHamburgerMenu="true"
+                CollapseItemToIconMode="MenuCollapseItemToIconMode.Sequentially"
+                CssClass="navbar navbar-expand-lg navbar-dark bg-primary" SizeMode="SizeMode.Small">
+            <Items>
+                <DxMenuItem>
+                    <Template>
+                        <button class="btn btn-secondary" onclick="MenuToggle()">☰</button>
+                    </Template>
+                </DxMenuItem>
+                <DxMenuItem>
+                    <Template>
+                        <h3 class="LAIP-title">LAIP</h3>
+                    </Template>
+                </DxMenuItem>
+                <DxMenuItem Position="ItemPosition.End">
+                    <Template>
+                        <AuthorizeView Context="AuthContext">
+                            <Authorized>
+                                <NavLink href="Account/Manage" class="button-link menubutton-float-end display-desktop">
+                                    <DxButton RenderStyle="@ButtonRenderStyle.Light" Text="@AuthContext.User.Identity?.Name" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button" IconCssClass="bi bi-person-circle"></DxButton>
+                                </NavLink>
+                            </Authorized>
+                        </AuthorizeView>
+                    </Template>
+                </DxMenuItem>
+                <DxMenuItem Position="ItemPosition.End">
+                    <Template>
+                        <AuthorizeView Context="AuthContext">
+                            <Authorized>
+                                <form action="Account/Logout" method="post" class="display-desktop">
+                                    <AntiforgeryToken />
+                                    <input type="hidden" name="ReturnUrl" value="" />
+                                    <DxButton RenderStyle="@ButtonRenderStyle.Light" SubmitFormOnClick="true" Text="Log out" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button" IconCssClass="bi bi-box-arrow-left"></DxButton>
+                                </form>
+                            </Authorized>
+                        </AuthorizeView>
+                    </Template>
+                </DxMenuItem>
+                <DxMenuItem Position="ItemPosition.End">
+                    <Template>
+                        <AuthorizeView Context="AuthContext">
+                            <NotAuthorized>
+                                <NavLink href="Account/Register" class="button-link menubutton-float-end display-desktop">
+                                    <DxButton RenderStyle="@ButtonRenderStyle.Light" Text="Register" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button-nav" IconCssClass="bi bi-r-circle"></DxButton>
+                                </NavLink>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </Template>
+                </DxMenuItem>
+                <DxMenuItem Position="ItemPosition.End">
+                    <Template>
+                        <AuthorizeView Context="AuthContext">
+                            <NotAuthorized>
+                                <NavLink href="Account/Login" class="button-link menubutton-float-end display-desktop">
+                                    <DxButton RenderStyle="@ButtonRenderStyle.Light" Text="Log in" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button-nav" IconCssClass="bi bi-box-arrow-in-right"></DxButton>
+                                </NavLink>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </Template>
+                </DxMenuItem>
+            </Items>
+        </DxMenu>
+    </div>
+    <div class="main">
+        <div id="menu">
+            <div id="expand-menu">
+                <DxMenu Orientation="@Orientation.Vertical"
+                        CssClass="expand-menu-item"
+                        DisplayMode="MenuDisplayMode.Auto">
+                    <Items>
+                        <DxMenuItem>
+                            <Template>
+                                <DxTextBox NullText="Tìm kiếm"
+                                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                           BindValueMode="BindValueMode.OnInput"
+                                           CssClass="toggle-button"
+                                           TextChanged="(value)=>searchText=value" />
+                            </Template>
+                        </DxMenuItem>
+                        <DxMenuItem NavigateUrl="/" Text="Dashboard" CssClass="menu-item" IconCssClass="bi bi-house-door-fill"></DxMenuItem>
+                        <DxMenuItem NavigateUrl="/company" Text="Công ty" CssClass="menu-item" IconCssClass="bi bi-building"></DxMenuItem>
+                        <DxMenuItem>
+                            <Template>
+                                @searchText
+                            </Template>
+                        </DxMenuItem>
+                    </Items>
+                </DxMenu>
             </div>
-        </DrawerBody>
-        <DrawerTarget>
-            <div class="nav-buttons-container">
-                <NavLink href="@UrlGenerator.GetUrl(new Uri(NavigationManager.Uri).LocalPath, !ToggledSidebar)">
-                    <DxButton RenderStyle="@ButtonRenderStyle.Secondary" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button" IconCssClass="icon icon-menu"></DxButton>
-                </NavLink>
-                @if (new Uri(NavigationManager.Uri).LocalPath != "/") {
-                    <NavLink href="@UrlGenerator.GetUrl("/", ToggledSidebar)" class="button-link hidden">
-                                <DxButton RenderStyle="@ButtonRenderStyle.Dark" Text="Back to Home" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button-nav" IconCssClass="icon icon-back"></DxButton>
-                    </NavLink>
-                }
-                <AuthorizeView>
-                    <Authorized>
-                        <NavLink href="@UrlGenerator.GetUrl("Account/Manage", !ToggledSidebar)" class="button-link menubutton-float-end display-desktop">
-                                    <DxButton RenderStyle="@ButtonRenderStyle.Light" Text="@context.User.Identity?.Name" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button" IconCssClass="icon icon-user"></DxButton>
-                        </NavLink>
-                        <form action="@UrlGenerator.GetUrl("Account/Logout", ToggledSidebar)" method="post" class="display-desktop">
-                            <AntiforgeryToken />
-                            <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                                   <DxButton RenderStyle="@ButtonRenderStyle.Dark" SubmitFormOnClick="true" Text="Log out" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button" IconCssClass="icon icon-log-out"></DxButton>
-                        </form>
-                    </Authorized>
-                    <NotAuthorized>
-                        <NavLink href="@UrlGenerator.GetUrl("Account/Login", ToggledSidebar)" class="button-link menubutton-float-end display-desktop">
-                                    <DxButton RenderStyle="@ButtonRenderStyle.Dark" Text="Log in" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button-nav" IconCssClass="icon icon-log-in"></DxButton>
- 
-                        </NavLink>
-                    </NotAuthorized>
-                </AuthorizeView>
+            <div id="hidden-menu" class="hidden">
+                <DxMenu Orientation="@Orientation.Vertical"
+                        CssClass="hidden-menu-item"
+                        DisplayMode="MenuDisplayMode.Auto">
+                    <Items>
+                        <DxMenuItem NavigateUrl="/" CssClass="menu-item" IconCssClass="bi bi-house-door-fill"></DxMenuItem>
+                        <DxMenuItem NavigateUrl="/company" CssClass="menu-item" IconCssClass="bi bi-building"></DxMenuItem>
+                    </Items>
+                </DxMenu>
             </div>
-            <div class="p-4">
-                @Body
-            </div>
-        </DrawerTarget>
-    </Drawer>
+        </div>
+        <div class="content">
+            @Body
+        </div>
+    </div>
 </div>
 
+
+<script>
+    function MenuToggle() {
+        document.getElementById("expand-menu").classList.toggle('hidden');
+        if($("#menu").css("width")=="30px"){
+            document.getElementById("menu").style.width="15rem";
+        }else{
+            document.getElementById("menu").style.width="30px";
+        }
+        document.getElementById("hidden-menu").classList.toggle('hidden');
+    }
+</script>
+
 @code {
-    [SupplyParameterFromQuery(Name = UrlGenerator.ToggleSidebarName)]
-    public bool ToggledSidebar { get; set; }
-
-    private RenderFragment drawerHeader => @<div class="navigation-drawer-header">
-        <img class="logo" src="images/logo.svg" alt="DevExpress logo" />
-        <NavLink href="@UrlGenerator.GetUrl(new Uri(NavigationManager.Uri).LocalPath, !ToggledSidebar)">
-            <DxButton RenderStyle="@ButtonRenderStyle.Light" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button-nav" IconCssClass="@(ToggledSidebar ? "icon icon-close" : "icon icon-menu")"></DxButton>
-        </NavLink>
-    </div>;
-
-    private RenderFragment drawerFooter => @<div>
-        <NavLink href="https://docs.devexpress.com/Blazor/400725/blazor-components" class="button-link">
-            <DxButton Text="Docs" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="footer-button" RenderStyle="@ButtonRenderStyle.Light" IconCssClass="icon docs-icon"></DxButton>
-        </NavLink>
-        <NavLink href="https://demos.devexpress.com/blazor/" class="button-link">
-            <DxButton Text="Demos" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="footer-button" RenderStyle="@ButtonRenderStyle.Light" IconCssClass="icon demos-icon"></DxButton>
-        </NavLink>
-    </div>;
+    public bool ShowNavMenu { get; set; }
+    public string? searchText { get; set; }
 
     private string? currentUrl;
 
-    protected override void OnInitialized() {
+    protected override void OnInitialized()
+    {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) {
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();
     }
 
-    public void Dispose() {
+    public void Dispose()
+    {
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
- 
 }
