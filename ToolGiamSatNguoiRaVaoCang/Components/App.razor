@@ -17,10 +17,10 @@
     @DxResourceManager.RegisterScripts()
     <link href=@AppendVersion("css/site.css") rel="stylesheet" />
     <link href=@AppendVersion("ToolGiamSatNguoiRaVaoCang.styles.css") rel="stylesheet" />
-    <HeadOutlet />
+    <HeadOutlet @rendermode="RenderModeForPage" />
 </head>
 <body>
-    <Routes></Routes>
+    <Routes @rendermode="RenderModeForPage" />
     <script src="_framework/blazor.web.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -31,4 +31,10 @@
 
 @code{
     private string AppendVersion(string path) => FileVersionProvider.AddFileVersionToPath("/", path);
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    private IComponentRenderMode? RenderModeForPage => HttpContext.Request.Path.StartsWithSegments("/Account")
+        ? null
+        : InteractiveServer;
 }

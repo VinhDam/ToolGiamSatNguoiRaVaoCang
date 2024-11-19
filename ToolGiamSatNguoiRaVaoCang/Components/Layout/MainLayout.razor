@@ -7,9 +7,9 @@
 
 <div class="page">
     <div class="header">
-        <DxMenu CollapseItemsToHamburgerMenu="true"
+        <DxMenu CssClass="navbar navbar-expand-lg navbar-dark bg-primary header-menu" CollapseItemsToHamburgerMenu="true"
                 CollapseItemToIconMode="MenuCollapseItemToIconMode.Sequentially"
-                CssClass="navbar navbar-expand-lg navbar-dark bg-primary" SizeMode="SizeMode.Small">
+                DisplayMode="MenuDisplayMode.Desktop">
             <Items>
                 <DxMenuItem>
                     <Template>
@@ -18,7 +18,7 @@
                 </DxMenuItem>
                 <DxMenuItem>
                     <Template>
-                        <h3 class="LAIP-title">LAIP</h3>
+                        <div class="LAIP-title">LAIP</div>
                     </Template>
                 </DxMenuItem>
                 <DxMenuItem Position="ItemPosition.End">
@@ -79,20 +79,18 @@
                     <Items>
                         <DxMenuItem>
                             <Template>
-                                <DxTextBox NullText="Tìm kiếm"
-                                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                                           BindValueMode="BindValueMode.OnInput"
-                                           CssClass="toggle-button"
-                                           TextChanged="(value)=>searchText=value" />
+                                <DxComboBox Data="@MenuList"
+                                            Value="@item"
+                                            ValueChanged="@((Item country) => FilterList(country))"
+                                            SearchMode="@ListSearchMode.AutoSearch"
+                                            TextFieldName="@nameof(Item.VietName)"
+                                            SearchFilterCondition="ListSearchFilterCondition.Contains"
+                                            ListRenderMode="ListRenderMode.Virtual"
+                                            NullText="Tìm kiếm" CssClass="search-box" />
                             </Template>
                         </DxMenuItem>
                         <DxMenuItem NavigateUrl="/" Text="Dashboard" CssClass="menu-item" IconCssClass="bi bi-house-door-fill"></DxMenuItem>
                         <DxMenuItem NavigateUrl="/company" Text="Công ty" CssClass="menu-item" IconCssClass="bi bi-building"></DxMenuItem>
-                        <DxMenuItem>
-                            <Template>
-                                @searchText
-                            </Template>
-                        </DxMenuItem>
                     </Items>
                 </DxMenu>
             </div>
@@ -147,5 +145,24 @@
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
+
+@code {
+    class Item
+    {
+        public string VietName { get; set; }
+        public string EngName { get; set; }
+    }
+    private List<Item> MenuList { get; set; } = new()
+    {
+        new Item { VietName="Dashboard", EngName=""},
+        new Item { VietName="Công ty", EngName="Company"},
+    };
+    private List<Item> FilterMenuList { get; set; } = new();
+    private Item item { get; set; } = new();
+    private async Task FilterList(Item searchText)
+    {
+        NavigationManager.NavigateTo($"/{searchText.EngName}");
     }
 }
