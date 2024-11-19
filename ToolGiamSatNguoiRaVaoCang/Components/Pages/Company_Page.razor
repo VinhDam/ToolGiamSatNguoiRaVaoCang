@@ -6,7 +6,7 @@
 <h5 style="margin: 0;padding: 0;">Danh sách nhà thầu</h5>
 
 <EditForm Model="Company"
-          OnValidSubmit="SaveItem" OnInvalidSubmit="InvalidSaveItem"
+          OnValidSubmit="SaveItem"
           FormName="EditForm"
           Context="EditFormContext">
     <DataAnnotationsValidator />
@@ -39,10 +39,14 @@
                            InputId="tbCompanyDescription"
                            CssClass="cw-480" />
             </DxFormLayoutItem>
-            <DxFormLayoutItem Caption="Loại khu vực" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+            <DxFormLayoutItem Caption="Trạng thái" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="1">
+                <DxCheckBox @bind-Checked="@Company.Status" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Loại ưu tiên" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
                 <DxComboBox Data="@Priorities"
                             @bind-Value="@Company.PriorityId"
                             TextFieldName="@nameof(IssuePriority.Name)"
+                            ValueFieldName="@nameof(IssuePriority.Id)"
                             NullText="Chọn loại khu vực"
                             SearchMode="@ListSearchMode.AutoSearch"
                             SearchFilterCondition="@ListSearchFilterCondition.Contains"
@@ -79,6 +83,7 @@
                 IndicatorAreaVisible="false"
                 Text="Fetching Data...">
     <DxGrid Data="Companies"
+            @ref="Grid"
             CssClass="ch-360"
             ShowSearchBox="true"
             ShowGroupPanel="true"
@@ -90,27 +95,35 @@
             PageSize="25"
             PagerVisibleNumericButtonCount="5"
             PagerNavigationMode="PagerNavigationMode.Auto"
-            SelectionMode="GridSelectionMode.Multiple"
-            SelectAllCheckboxMode="GridSelectAllCheckboxMode.AllPages">
+            SelectionMode="GridSelectionMode.Single"
+            @bind-SelectedDataItem="@SelectedDataItem"
+            DataItemDeleting="Grid_DataItemDeleting"
+            AllowSelectRowByClick="true"
+            ColumnResizeMode="GridColumnResizeMode.NextColumn"
+            RowDoubleClick="ChooseRowToEdit"
+            ShowFilterRow="true"
+            FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always" >
         <Columns>
             <DxGridDataColumn FieldName="Code" Caption="Mã nhà thầu" />
             <DxGridDataColumn FieldName="Name" Caption="Tên nhà thầu" />
             <DxGridDataColumn FieldName="Description" Caption="Mô tả" />
-            <DxGridDataColumn FieldName="Status" Caption="Trạng thái" TextAlignment="GridTextAlignment.Left">
+            <DxGridDataColumn FieldName="Status" Caption="Trạng thái" TextAlignment="GridTextAlignment.Left" Width="120px">
                 <CellDisplayTemplate>
                     @GetIssueStatusIcon(((Company)context.DataItem).Status,
                              ((Company)context.DataItem).CreateDate,
                              ((Company)context.DataItem).UpdateDate)
                 </CellDisplayTemplate>
             </DxGridDataColumn>
-            <DxGridDataColumn FieldName="PriorityId" Caption="Ưu tiên">
+            <DxGridDataColumn FieldName="PriorityId" Caption="Ưu tiên" Width="90px">
                 <CellDisplayTemplate>
                     @GetIssuePriorityIconHtml((context.DataItem as Company).Priority)
                 </CellDisplayTemplate>
             </DxGridDataColumn>
-            <DxGridCommandColumn Caption="Action">
-                <DxButton IconCssClass="bi bi-trash" />
-            </DxGridCommandColumn>
+            <DxGridDataColumn Caption="Action" TextAlignment="GridTextAlignment.Center" CaptionAlignment="GridTextAlignment.Center" Width="75px">
+                <CellDisplayTemplate>
+                    <a class="oi oi-trash" @onclick="@(() => Grid.ShowRowDeleteConfirmation(context.VisibleIndex))" style="text-decoration:none;cursor: pointer;" />
+                </CellDisplayTemplate>
+            </DxGridDataColumn>
         </Columns>
         <SearchBoxTemplate>
             <div class="search-box-template">
@@ -137,6 +150,7 @@
     private IEnumerable<Company> Companies { get; set; } = new List<Company>();
     private List<IssuePriority> Priorities { get; set; } = new List<IssuePriority>();
     private Company Company { get; set; } = new Company();
+    private object SelectedDataItem { get; set; }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -156,15 +170,22 @@
     }
     private async Task SaveItem()
     {
-
-    }
-    private async Task InvalidSaveItem()
-    {
+        if (SelectedDataItem == null)
+        {
+            await _companyRepository.CreateAsync(Company);
+            await Clear();
+        }
+        else
+        {
+            await _companyRepository.UpdateAsync(Company);
+            await Clear();
+        }
 
     }
     private async Task Clear()
     {
-
+        Company = new();
+        await LoadCompanies();
     }
     async Task ExportXlsx_Click()
     {
@@ -177,6 +198,13 @@
     {
         string priorytyClass = "warning";
         string title = "Trung bình";
+        if (priority == null)
+        {
+            priorytyClass = "none";
+            title = "Không có";
+            string nullpriority = string.Format("<span class='badge priority-{0}' title='Ưu tiên {1}' b-v2bewct92u>{1}</span>", priorytyClass, title);
+            return new MarkupString(nullpriority);
+        }
         if (priority.Name == "Cao")
         {
             priorytyClass = "danger";
@@ -195,7 +223,7 @@
         string statusIconName = "";
         if (status)
         {
-            if (createDate == updateDate)
+            if (createDate.Date == updateDate.Date && createDate.TimeOfDay == updateDate.TimeOfDay)
             {
                 statusIconName = "new";
             }
@@ -212,5 +240,13 @@
         statusIconName);
         return new MarkupString(html);
     }
-
+    async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
+    {
+        await _companyRepository.DeleteAsync(((Company)e.DataItem).Id);
+        await LoadCompanies();
+    }
+    async Task ChooseRowToEdit()
+    {
+        Company = SelectedDataItem as Company;
+    }
 }

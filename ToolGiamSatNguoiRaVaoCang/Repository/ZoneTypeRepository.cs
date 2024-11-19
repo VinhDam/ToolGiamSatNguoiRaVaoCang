@@ -16,7 +16,7 @@ namespace ToolGiamSatNguoiRaVaoCang.Repository
         public async Task<ZoneType> CreateAsync(ZoneType obj)
         {
             obj.CreateDate = DateTime.Now;
-            obj.UpdateDate = DateTime.Now;
+            obj.UpdateDate = obj.CreateDate;
             await _db.ZoneType.AddAsync(obj);
             await _db.SaveChangesAsync();
             return obj;

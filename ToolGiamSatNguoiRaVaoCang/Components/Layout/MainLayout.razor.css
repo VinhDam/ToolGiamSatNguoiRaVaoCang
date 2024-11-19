@@ -46,6 +46,11 @@
     background-color: inherit;
     width: 100%;
 }
+
+::deep .search-box{
+    width:100%;
+}
+
 ::deep .hidden-menu-item {
     background-color: inherit;
     width: 100%;

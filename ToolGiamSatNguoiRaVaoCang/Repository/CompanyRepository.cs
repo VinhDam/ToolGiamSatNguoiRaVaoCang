@@ -16,7 +16,7 @@ namespace ToolGiamSatNguoiRaVaoCang.Repository
         public async Task<Company> CreateAsync(Company obj)
         {
             obj.CreateDate = DateTime.Now;
-            obj.UpdateDate = DateTime.Now;
+            obj.UpdateDate = obj.CreateDate;
             await _db.Company.AddAsync(obj);
             await _db.SaveChangesAsync();
             return obj;
