@@ -1,6 +1,9 @@
-﻿@using DevExpress.Blazor.Internal
+﻿@using BlazorBootstrap
+@using DevExpress.Blazor.Internal
+@using ToolGiamSatNguoiRaVaoCang.StaticData
 @using ToolGiamSatNguoiRaVaoCang.Utilities
 @implements IDisposable
+@inject IJSRuntime _JS
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 
@@ -9,7 +12,10 @@
     <div class="header">
         <div class="header-item">
             <div>
-                <a class="btn btn-info toggle-button" onclick="MenuToggle()">☰</a>
+                <button class="toggle-button bi bi-list" onclick="MenuToggle()" />
+            </div>
+            <div>
+                <img src="~/images/logo.svg" />
             </div>
             <div>
                 <div class="title">LAIP</div>
@@ -20,14 +26,22 @@
             <Authorized>
                 <div class="header-item header-item-right">
                     <NavLink href="Account/Manage">
-                        <DxButton RenderStyle="@ButtonRenderStyle.Light" Text="@AuthContext.User.Identity?.Name" RenderStyleMode="@ButtonRenderStyleMode.Text" IconCssClass="bi bi-person-circle"></DxButton>
+                        <DxButton RenderStyle="@ButtonRenderStyle.Primary"
+                        Text="@AuthContext.User.Identity?.Name"
+                        CssClass="menu-button-nav"
+                        RenderStyleMode="@ButtonRenderStyleMode.Contained"
+                        IconCssClass="bi bi-person-circle"></DxButton>
                     </NavLink>
                 </div>
                 <div class="header-item header-item-right">
                     <form action="Account/Logout" method="post">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="" />
-                        <DxButton RenderStyle="@ButtonRenderStyle.Light" SubmitFormOnClick="true" Text="Log out" RenderStyleMode="@ButtonRenderStyleMode.Text" IconCssClass="bi bi-box-arrow-left"></DxButton>
+                        <DxButton RenderStyle="@ButtonRenderStyle.Primary"
+                        SubmitFormOnClick="true" Text="Log out"
+                        RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                        CssClass="menu-button-nav"
+                        IconCssClass="bi bi-box-arrow-left"></DxButton>
                     </form>
 
                 </div>
@@ -35,12 +49,20 @@
             <NotAuthorized>
                 <div class="header-item header-item-right">
                     <NavLink href="Account/Register">
-                        <DxButton RenderStyle="@ButtonRenderStyle.Light" Text="Register" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button-nav" IconCssClass="bi bi-r-circle"></DxButton>
+                        <DxButton RenderStyle="@ButtonRenderStyle.Primary"
+                        Text="Register"
+                        RenderStyleMode="@ButtonRenderStyleMode.Contained"
+                        CssClass="menu-button-nav"
+                        IconCssClass="bi bi-r-circle"></DxButton>
                     </NavLink>
                 </div>
                 <div class="header-item header-item-right">
                     <NavLink href="Account/Login">
-                        <DxButton RenderStyle="@ButtonRenderStyle.Light" Text="Log in" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button-nav" IconCssClass="bi bi-box-arrow-in-right"></DxButton>
+                        <DxButton RenderStyle="@ButtonRenderStyle.Primary"
+                        Text="Log in"
+                        RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                        CssClass="menu-button-nav"
+                        IconCssClass="bi bi-box-arrow-in-right"></DxButton>
                     </NavLink>
                 </div>
             </NotAuthorized>
@@ -48,41 +70,44 @@
     </div>
     <div class="body">
         <div id="side-navbar">
-            <div id="search-box">
-                <DxComboBox Data="@MenuList"
-                            Value="@item"
-                            ValueChanged="@((Item country) => FilterList(country))"
-                            SearchMode="@ListSearchMode.AutoSearch"
-                            TextFieldName="@nameof(Item.VietName)"
-                            SearchFilterCondition="ListSearchFilterCondition.Contains"
-                            ListRenderMode="ListRenderMode.Virtual"
-                            NullText="Tìm kiếm" />
+            <div id="search-box-area">
+                <DxTextBox @bind-Text="@searchText"
+                BindValueMode="BindValueMode.OnInput"
+                NullText="Tìm kiếm"
+                CssClass="search-box"
+                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
+                    <Buttons>
+                        <DxEditorButton IconCssClass="icon icon-search" CssClass="search-button" />
+                    </Buttons>
+                </DxTextBox>
             </div>
             <div id="expanded-menu">
-                <DxMenu Orientation="@Orientation.Vertical"
-                        CssClass="side-nav-menu"
-                        DisplayMode="MenuDisplayMode.Auto">
-                    <Items>
-                        <DxMenuItem NavigateUrl="/" Text="Dashboard" IconCssClass="bi bi-house-door-fill" />
-                        <DxMenuItem NavigateUrl="/company" Text="Công ty" IconCssClass="bi bi-building" />
-                        <DxMenuItem NavigateUrl="/shift" Text="Ca làm việc" IconCssClass="bi bi-clock" />
-                    </Items>
-                </DxMenu>
-            </div>
-            <div id="hidden-menu">
-                <DxMenu Orientation="@Orientation.Vertical"
-                        CssClass="side-nav-menu"
-                        DisplayMode="MenuDisplayMode.Auto">
-                    <Items>
-                        <DxMenuItem NavigateUrl="/" IconCssClass="bi bi-house-door-fill" />
-                        <DxMenuItem NavigateUrl="/company" IconCssClass="bi bi-building" />
-                        <DxMenuItem NavigateUrl="/shift" IconCssClass="bi bi-clock" />
-                    </Items>
-                </DxMenu>
+                <DxTreeView AnimationType="LayoutAnimationType.Slide">
+                    <Nodes>
+                        <DxTreeViewNode NavigateUrl="/" Text="Công ty" />
+                        <DxTreeViewNode Text="Danh mục">
+                            <Nodes>
+                                <DxTreeViewNode NavigateUrl="/company" Text="Công ty" AllowSelection="true"/>
+                                <DxTreeViewNode NavigateUrl="/shift" Text="Ca làm việc" AllowSelection="true" />
+                            </Nodes>
+                        </DxTreeViewNode>
+                    </Nodes>
+                </DxTreeView>
             </div>
         </div>
-        <div id="content">
-            @Body
+        <div id="body">
+            <div class="navigator">
+                <a href="/" class="navigator-item">Home</a>
+                @if (breadcrumb!=null){
+                    <i class="bi bi-caret-right-fill navigator-item"></i>
+                    <a class="navigator-item">@breadcrumb.ParentName</a>
+                    <i class="bi bi-caret-right-fill navigator-item"></i>
+                    <a class="navigator-item">@breadcrumb.VietName</a>
+                }
+            </div>
+            <div class="content">
+                @Body
+            </div>
         </div>
     </div>
 </div>
@@ -90,28 +115,27 @@
 
 <script>
     function MenuToggle(){
-        if(document.getElementById("side-navbar").style.width!="30px"){
-            document.getElementById("side-navbar").style.width="30px";
-            document.getElementById("search-box").style.display="none";
-            document.getElementById("expanded-menu").style.display="none";
-            document.getElementById("hidden-menu").style.display="block";
-        }else{
-            document.getElementById("side-navbar").style.width="15rem";
-            document.getElementById("search-box").style.display="block";
-            document.getElementById("expanded-menu").style.display="block";
-            document.getElementById("hidden-menu").style.display="none";
-        }
+    if(document.getElementById("side-navbar").style.width!="0px"){
+    document.getElementById("side-navbar").style.width="0px";
+    document.getElementById("search-box-area").style.width="0px";
+    document.getElementById("search-box").style.width="0px";
+    document.getElementById("expanded-menu").style.width="0px";
+    }else{
+    document.getElementById("side-navbar").style.width="330px";
+    document.getElementById("search-box-area").style.width="auto";
+    document.getElementById("search-box").style.width="auto";
+    document.getElementById("expanded-menu").style.width="auto";
+    }
     }
 
 </script>
 
 @code {
-    public bool ShowNavMenu { get; set; }
     public string? searchText { get; set; }
 
     private string? currentUrl;
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
@@ -120,6 +144,10 @@
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        breadcrumb = null;
+        @if (!string.IsNullOrEmpty(currentUrl)){
+            breadcrumb = BreadCrumbList.Where(u => u.EngName.Contains(currentUrl, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+        }
         StateHasChanged();
     }
 
@@ -130,20 +158,10 @@
 }
 
 @code {
-    class Item
-    {
-        public string VietName { get; set; }
-        public string EngName { get; set; }
-    }
-    private List<Item> MenuList { get; set; } = new()
-    {
-        new Item { VietName="Dashboard", EngName=""},
-        new Item { VietName="Công ty", EngName="Company"},
-    };
-    private List<Item> FilterMenuList { get; set; } = new();
-    private Item item { get; set; } = new();
-    private async Task FilterList(Item searchText)
-    {
-        NavigationManager.NavigateTo($"/{searchText.EngName}");
-    }
+    public BreadCrumb breadcrumb { get; set; }
+    public List<BreadCrumb> BreadCrumbList { get; set; } = new List<BreadCrumb>
+        {
+            new BreadCrumb {ParentName = "Danh mục", VietName = "Công ty", EngName="Company" },
+            new BreadCrumb {ParentName = "Danh mục", VietName = "Ca làm việc", EngName="Shift" }
+        };
 }
