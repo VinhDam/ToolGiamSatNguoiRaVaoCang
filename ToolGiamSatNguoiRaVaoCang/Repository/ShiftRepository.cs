@@ -58,7 +58,7 @@ namespace ToolGiamSatNguoiRaVaoCang.Repository
                 objFromDb.Description = obj.Description;
                 objFromDb.StartHour = obj.StartHour;
                 objFromDb.EndHour = obj.EndHour;
-                objFromDb.UpdateDate = obj.UpdateDate;
+                objFromDb.UpdateDate = DateTime.Now;
                 _db.Shift.Update(objFromDb);
                 await _db.SaveChangesAsync();
                 return objFromDb;

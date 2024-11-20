@@ -56,7 +56,7 @@ namespace ToolGiamSatNguoiRaVaoCang.Repository
                 objFromDb.Code = obj.Code;
                 objFromDb.Name = obj.Name;
                 objFromDb.Description = obj.Description;
-                objFromDb.UpdateDate = obj.UpdateDate;
+                objFromDb.UpdateDate = DateTime.Now;
                 _db.Company.Update(objFromDb);
                 await _db.SaveChangesAsync();
                 return objFromDb;

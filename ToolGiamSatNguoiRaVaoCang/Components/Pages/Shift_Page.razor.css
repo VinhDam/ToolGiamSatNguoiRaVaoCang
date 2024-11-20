@@ -51,3 +51,7 @@
 .status-icon-fixed {
     background-color: var(--bs-green);
 }
+
+::deep .time-box{
+    width:fit-content;
+}

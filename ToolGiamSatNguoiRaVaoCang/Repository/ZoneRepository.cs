@@ -57,7 +57,7 @@ namespace ToolGiamSatNguoiRaVaoCang.Repository
                 objFromDb.Name = obj.Name;
                 objFromDb.Description = obj.Description;
                 objFromDb.ZoneTypeId = obj.ZoneTypeId;
-                objFromDb.UpdateDate = obj.UpdateDate;
+                objFromDb.UpdateDate = DateTime.Now;
                 _db.Zone.Update(objFromDb);
                 await _db.SaveChangesAsync();
                 return objFromDb;

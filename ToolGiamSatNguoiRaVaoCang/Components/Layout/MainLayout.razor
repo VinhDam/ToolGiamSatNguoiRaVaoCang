@@ -7,105 +7,81 @@
 
 <div class="page">
     <div class="header">
-        <DxMenu CssClass="navbar navbar-expand-lg navbar-dark bg-primary header-menu" CollapseItemsToHamburgerMenu="true"
-                CollapseItemToIconMode="MenuCollapseItemToIconMode.Sequentially"
-                DisplayMode="MenuDisplayMode.Desktop">
-            <Items>
-                <DxMenuItem>
-                    <Template>
-                        <button class="btn btn-secondary" onclick="MenuToggle()">☰</button>
-                    </Template>
-                </DxMenuItem>
-                <DxMenuItem>
-                    <Template>
-                        <div class="LAIP-title">LAIP</div>
-                    </Template>
-                </DxMenuItem>
-                <DxMenuItem Position="ItemPosition.End">
-                    <Template>
-                        <AuthorizeView Context="AuthContext">
-                            <Authorized>
-                                <NavLink href="Account/Manage" class="button-link menubutton-float-end display-desktop">
-                                    <DxButton RenderStyle="@ButtonRenderStyle.Light" Text="@AuthContext.User.Identity?.Name" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button" IconCssClass="bi bi-person-circle"></DxButton>
-                                </NavLink>
-                            </Authorized>
-                        </AuthorizeView>
-                    </Template>
-                </DxMenuItem>
-                <DxMenuItem Position="ItemPosition.End">
-                    <Template>
-                        <AuthorizeView Context="AuthContext">
-                            <Authorized>
-                                <form action="Account/Logout" method="post" class="display-desktop">
-                                    <AntiforgeryToken />
-                                    <input type="hidden" name="ReturnUrl" value="" />
-                                    <DxButton RenderStyle="@ButtonRenderStyle.Light" SubmitFormOnClick="true" Text="Log out" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button" IconCssClass="bi bi-box-arrow-left"></DxButton>
-                                </form>
-                            </Authorized>
-                        </AuthorizeView>
-                    </Template>
-                </DxMenuItem>
-                <DxMenuItem Position="ItemPosition.End">
-                    <Template>
-                        <AuthorizeView Context="AuthContext">
-                            <NotAuthorized>
-                                <NavLink href="Account/Register" class="button-link menubutton-float-end display-desktop">
-                                    <DxButton RenderStyle="@ButtonRenderStyle.Light" Text="Register" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button-nav" IconCssClass="bi bi-r-circle"></DxButton>
-                                </NavLink>
-                            </NotAuthorized>
-                        </AuthorizeView>
-                    </Template>
-                </DxMenuItem>
-                <DxMenuItem Position="ItemPosition.End">
-                    <Template>
-                        <AuthorizeView Context="AuthContext">
-                            <NotAuthorized>
-                                <NavLink href="Account/Login" class="button-link menubutton-float-end display-desktop">
-                                    <DxButton RenderStyle="@ButtonRenderStyle.Light" Text="Log in" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button-nav" IconCssClass="bi bi-box-arrow-in-right"></DxButton>
-                                </NavLink>
-                            </NotAuthorized>
-                        </AuthorizeView>
-                    </Template>
-                </DxMenuItem>
-            </Items>
-        </DxMenu>
+        <div class="header-item">
+            <div>
+                <a class="btn btn-info toggle-button" onclick="MenuToggle()">☰</a>
+            </div>
+            <div>
+                <div class="title">LAIP</div>
+            </div>
+        </div>
+        <div class="flex-space header-item" />
+        <AuthorizeView Context="AuthContext">
+            <Authorized>
+                <div class="header-item header-item-right">
+                    <NavLink href="Account/Manage">
+                        <DxButton RenderStyle="@ButtonRenderStyle.Light" Text="@AuthContext.User.Identity?.Name" RenderStyleMode="@ButtonRenderStyleMode.Text" IconCssClass="bi bi-person-circle"></DxButton>
+                    </NavLink>
+                </div>
+                <div class="header-item header-item-right">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="" />
+                        <DxButton RenderStyle="@ButtonRenderStyle.Light" SubmitFormOnClick="true" Text="Log out" RenderStyleMode="@ButtonRenderStyleMode.Text" IconCssClass="bi bi-box-arrow-left"></DxButton>
+                    </form>
+
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="header-item header-item-right">
+                    <NavLink href="Account/Register">
+                        <DxButton RenderStyle="@ButtonRenderStyle.Light" Text="Register" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button-nav" IconCssClass="bi bi-r-circle"></DxButton>
+                    </NavLink>
+                </div>
+                <div class="header-item header-item-right">
+                    <NavLink href="Account/Login">
+                        <DxButton RenderStyle="@ButtonRenderStyle.Light" Text="Log in" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button-nav" IconCssClass="bi bi-box-arrow-in-right"></DxButton>
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
     </div>
-    <div class="main">
-        <div id="menu">
-            <div id="expand-menu">
+    <div class="body">
+        <div id="side-navbar">
+            <div id="search-box">
+                <DxComboBox Data="@MenuList"
+                            Value="@item"
+                            ValueChanged="@((Item country) => FilterList(country))"
+                            SearchMode="@ListSearchMode.AutoSearch"
+                            TextFieldName="@nameof(Item.VietName)"
+                            SearchFilterCondition="ListSearchFilterCondition.Contains"
+                            ListRenderMode="ListRenderMode.Virtual"
+                            NullText="Tìm kiếm" />
+            </div>
+            <div id="expanded-menu">
                 <DxMenu Orientation="@Orientation.Vertical"
-                        CssClass="expand-menu-item"
+                        CssClass="side-nav-menu"
                         DisplayMode="MenuDisplayMode.Auto">
                     <Items>
-                        <DxMenuItem>
-                            <Template>
-                                <DxComboBox Data="@MenuList"
-                                            Value="@item"
-                                            ValueChanged="@((Item country) => FilterList(country))"
-                                            SearchMode="@ListSearchMode.AutoSearch"
-                                            TextFieldName="@nameof(Item.VietName)"
-                                            SearchFilterCondition="ListSearchFilterCondition.Contains"
-                                            ListRenderMode="ListRenderMode.Virtual"
-                                            NullText="Tìm kiếm" CssClass="search-box" />
-                            </Template>
-                        </DxMenuItem>
-                        <DxMenuItem NavigateUrl="/" Text="Dashboard" CssClass="menu-item" IconCssClass="bi bi-house-door-fill"></DxMenuItem>
-                        <DxMenuItem NavigateUrl="/company" Text="Công ty" CssClass="menu-item" IconCssClass="bi bi-building"></DxMenuItem>
+                        <DxMenuItem NavigateUrl="/" Text="Dashboard" IconCssClass="bi bi-house-door-fill" />
+                        <DxMenuItem NavigateUrl="/company" Text="Công ty" IconCssClass="bi bi-building" />
+                        <DxMenuItem NavigateUrl="/shift" Text="Ca làm việc" IconCssClass="bi bi-clock" />
                     </Items>
                 </DxMenu>
             </div>
-            <div id="hidden-menu" class="hidden">
+            <div id="hidden-menu">
                 <DxMenu Orientation="@Orientation.Vertical"
-                        CssClass="hidden-menu-item"
+                        CssClass="side-nav-menu"
                         DisplayMode="MenuDisplayMode.Auto">
                     <Items>
-                        <DxMenuItem NavigateUrl="/" CssClass="menu-item" IconCssClass="bi bi-house-door-fill"></DxMenuItem>
-                        <DxMenuItem NavigateUrl="/company" CssClass="menu-item" IconCssClass="bi bi-building"></DxMenuItem>
+                        <DxMenuItem NavigateUrl="/" IconCssClass="bi bi-house-door-fill" />
+                        <DxMenuItem NavigateUrl="/company" IconCssClass="bi bi-building" />
+                        <DxMenuItem NavigateUrl="/shift" IconCssClass="bi bi-clock" />
                     </Items>
                 </DxMenu>
             </div>
         </div>
-        <div class="content">
+        <div id="content">
             @Body
         </div>
     </div>
@@ -113,15 +89,20 @@
 
 
 <script>
-    function MenuToggle() {
-        document.getElementById("expand-menu").classList.toggle('hidden');
-        if($("#menu").css("width")=="30px"){
-            document.getElementById("menu").style.width="15rem";
+    function MenuToggle(){
+        if(document.getElementById("side-navbar").style.width!="30px"){
+            document.getElementById("side-navbar").style.width="30px";
+            document.getElementById("search-box").style.display="none";
+            document.getElementById("expanded-menu").style.display="none";
+            document.getElementById("hidden-menu").style.display="block";
         }else{
-            document.getElementById("menu").style.width="30px";
+            document.getElementById("side-navbar").style.width="15rem";
+            document.getElementById("search-box").style.display="block";
+            document.getElementById("expanded-menu").style.display="block";
+            document.getElementById("hidden-menu").style.display="none";
         }
-        document.getElementById("hidden-menu").classList.toggle('hidden');
     }
+
 </script>
 
 @code {

@@ -1,50 +1,50 @@
-﻿@page "/company"
-@inject ICompanyRepository _companyRepository
+﻿@page "/shift"
+@inject IShiftRepository _companyRepository
 @rendermode InteractiveServer
 @inject ApplicationDbContext _db
 
 <h5 style="margin: 0;padding: 0;">Danh sách nhà thầu</h5>
 
-<EditForm Model="Company"
+<EditForm Model="Shift"
           OnValidSubmit="SaveItem"
           FormName="EditForm"
           Context="EditFormContext">
     <DataAnnotationsValidator />
     <DxFormLayout CssClass="w-100">
-        <DxFormLayoutGroup Caption="Form cập nhật công ty"
+        <DxFormLayoutGroup Caption="Form cập nhật ca làm việc"
                            ExpandButtonDisplayMode="GroupExpandButtonDisplayMode.Start"
                            AnimationType="LayoutAnimationType.Slide"
                            ColSpanLg="12">
-            <DxFormLayoutItem Caption="Mã nhà thầu" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
-                <DxTextBox @bind-Text="@Company.Code"
+            <DxFormLayoutItem Caption="Mã ca làm việc" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxTextBox @bind-Text="@Shift.Code"
                            NullText="Nhập mã số"
                            BindValueMode="BindValueMode.OnInput"
                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
                            CssClass="cw-480"
-                           InputId="tbCompanyID" />
+                           InputId="tbShiftID" />
             </DxFormLayoutItem>
-            <DxFormLayoutItem Caption="Tên nhà thầu" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="2">
-                <DxTextBox @bind-Text="@Company.Name"
+            <DxFormLayoutItem Caption="Ca làm việc" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="2">
+                <DxTextBox @bind-Text="@Shift.Name"
                            NullText="Nhập tên công ty"
                            BindValueMode="BindValueMode.OnInput"
                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
                            CssClass="cw-480"
-                           InputId="tbCompanyName" />
+                           InputId="tbShiftName" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Mô tả" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
-                <DxTextBox @bind-Text="@Company.Description"
+                <DxTextBox @bind-Text="@Shift.Description"
                            NullText="Nhập mô tả"
                            BindValueMode="BindValueMode.OnInput"
                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                           InputId="tbCompanyDescription"
+                           InputId="tbShiftDescription"
                            CssClass="cw-480" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Trạng thái" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="1">
-                <DxCheckBox @bind-Checked="@Company.Status" />
+                <DxCheckBox @bind-Checked="@Shift.Status" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Loại ưu tiên" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
                 <DxComboBox Data="@Priorities"
-                            @bind-Value="@Company.PriorityId"
+                            @bind-Value="@Shift.PriorityId"
                             TextFieldName="@nameof(IssuePriority.Name)"
                             ValueFieldName="@nameof(IssuePriority.Id)"
                             NullText="Chọn loại khu vực"
@@ -53,6 +53,12 @@
                             ListRenderMode="ListRenderMode.Virtual"
                             CssClass="cw-480"
                             InputId="cbVirtualScrolling" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Giờ bắt đầu" CaptionPosition="CaptionPosition.Vertical" CssClass="time-box">
+                <DxTimeEdit @bind-Time="@Shift.StartHour" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Giờ kết thúc" CaptionPosition="CaptionPosition.Vertical" CssClass="time-box">
+                <DxTimeEdit @bind-Time="@Shift.EndHour" />
             </DxFormLayoutItem>
             <DxFormLayoutItem ColSpanMd="3">
                 <div class="save-layout">
@@ -105,21 +111,23 @@
             ShowFilterRow="true"
             FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always" >
         <Columns>
-            <DxGridDataColumn FieldName="Code" Caption="Mã nhà thầu" />
-            <DxGridDataColumn FieldName="Name" Caption="Tên nhà thầu" />
+            <DxGridDataColumn FieldName="Code" Caption="Mã ca làm việc" />
+            <DxGridDataColumn FieldName="Name" Caption="Ca làm việc" />
             <DxGridDataColumn FieldName="Description" Caption="Mô tả" />
             <DxGridDataColumn FieldName="Status" Caption="Trạng thái" TextAlignment="GridTextAlignment.Left" Width="120px">
                 <CellDisplayTemplate>
-                    @GetIssueStatusIcon(((Company)context.DataItem).Status,
-                             ((Company)context.DataItem).CreateDate,
-                             ((Company)context.DataItem).UpdateDate)
+                    @GetIssueStatusIcon(((Shift)context.DataItem).Status,
+                             ((Shift)context.DataItem).CreateDate,
+                             ((Shift)context.DataItem).UpdateDate)
                 </CellDisplayTemplate>
             </DxGridDataColumn>
             <DxGridDataColumn FieldName="PriorityId" Caption="Ưu tiên" Width="90px">
                 <CellDisplayTemplate>
-                    @GetIssuePriorityIconHtml((context.DataItem as Company).Priority)
+                    @GetIssuePriorityIconHtml((context.DataItem as Shift).Priority)
                 </CellDisplayTemplate>
             </DxGridDataColumn>
+            <DxGridDataColumn FieldName="StartHour" Caption="Giờ bắt đầu" Width="130px"/>
+            <DxGridDataColumn FieldName="EndHour" Caption="Giờ bắt đầu" Width="130px" />
             <DxGridDataColumn Caption="Action" TextAlignment="GridTextAlignment.Center" CaptionAlignment="GridTextAlignment.Center" Width="75px">
                 <CellDisplayTemplate>
                     <a class="oi oi-trash" @onclick="@(() => Grid.ShowRowDeleteConfirmation(context.VisibleIndex))" style="text-decoration:none;cursor: pointer;" />
@@ -148,9 +156,9 @@
     IGrid Grid { get; set; }
     bool ExportSelectedRowsOnly { get; set; }
     public bool IsProcessing { get; set; }
-    private IEnumerable<Company> Companies { get; set; } = new List<Company>();
+    private IEnumerable<Shift> Companies { get; set; } = new List<Shift>();
     private List<IssuePriority> Priorities { get; set; } = new List<IssuePriority>();
-    private Company Company { get; set; } = new Company();
+    private Shift Shift { get; set; } = new Shift();
     private object SelectedDataItem { get; set; }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -173,19 +181,19 @@
     {
         if (SelectedDataItem == null)
         {
-            await _companyRepository.CreateAsync(Company);
+            await _companyRepository.CreateAsync(Shift);
             await Clear();
         }
         else
         {
-            await _companyRepository.UpdateAsync(Company);
+            await _companyRepository.UpdateAsync(Shift);
             await Clear();
         }
 
     }
     private async Task Clear()
     {
-        Company = new();
+        Shift = new();
         await LoadCompanies();
     }
     async Task ExportXlsx_Click()
@@ -243,11 +251,11 @@
     }
     async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
     {
-        await _companyRepository.DeleteAsync(((Company)e.DataItem).Id);
+        await _companyRepository.DeleteAsync(((Shift)e.DataItem).Id);
         await LoadCompanies();
     }
     async Task ChooseRowToEdit()
     {
-        Company = SelectedDataItem as Company;
+        Shift = SelectedDataItem as Shift;
     }
 }
