@@ -191,4 +191,12 @@
         text-indent: -9999px;
         background-image: url("images/box-arrow-in-right.svg");
     }
+    ::deep .user {
+        text-indent: -9999px;
+        background-image: url("images/person-circle.svg");
+    }
+    ::deep .logout {
+        text-indent: -9999px;
+        background-image: url("images/box-arrow-left.svg");
+    }
 }
