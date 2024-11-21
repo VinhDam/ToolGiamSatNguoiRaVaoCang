@@ -1,37 +1,59 @@
 ﻿﻿.page {
     height: 100%;
+    width:100%;
     font-family: var(--bs-font-sans-serif);
 }
 
 .header {
-    height: 48px;
+    height: 50px;
     display: flex;
-    flex-direction: row;
-    padding: 5px;
-    background-color: white;
-    gap: 5px;
+    flex-direction: row;       
+    background-color: white;   
+    gap: 5px;                   
     box-shadow: 0 0px 50px 0 rgba(0, 0, 0, 0.2), 0 0px 50px 0 rgba(0, 0, 0, 0.19);
 }
+
 .header-item {
     height: 100%;
-    width: 100%;
     display: flex;
     align-items: center;
+    justify-content:center;
     width: fit-content;
-    
 }
 
+.toggle-button-container {
+    margin-left: 10px;
+}
 
 .toggle-button {
     background-color: currentColor;
+    background-color: white;
+    border: white;
+    border-radius: 50%/50%;
+    font-size: 25px;
+    width: 40px;
+    height: 40px;
 }
 
-.title {
+    .toggle-button:hover {
+        background-color: lightblue;
+        border: white;
+        border-radius: 50%/50%;
+        font-size: 25px;
+        width: 40px;
+        height: 40px;
+    }
 
+.logo {
+    margin-left: 10px;
+}
+
+::deep .title {
     font-size: 22px;
     margin-left: 10px;
     padding-top: 5px;
     padding-bottom: 5px;
+    text-decoration:none;
 }
 
 .flex-space{
@@ -40,8 +62,9 @@
 
 .header-item-right {
     justify-content: flex-end;
-    color:black;
+    margin-right:7px;
 }
+
 ::deep .menu-button-nav{
     border-radius:100px;
 }
@@ -51,15 +74,14 @@
     display: flex;
 }
 
-#side-navbar {
+#body-side-navbar {
     height: 100%;
     width: 330px;
     box-shadow: inset -140px -8px 30px -100px rgba(0, 0, 0, 0.08);
     transition: all 0.5s;
-}
-::deep .side-nav-menu {
-    background-color: inherit;
-    margin-left:3px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 #search-box-area {
@@ -68,15 +90,40 @@
     align-items: center;
     height: 3rem;
     background-color: #ececec;
-    box-shadow: -140px 10px 32px -101px rgba(27,17,17,0.75) inset;
-    position: relative;
-    z-index: -1;
+    
 }
 
-::deep .search-box{
-    flex-grow:1;
-    height:100%;
-    background-color:inherit;
+::deep .search-box {
+    flex-grow: 1;
+    height: 100%;
+    background-image: linear-gradient(to top,#e8e8e8 60%,  #c6c6c6 100%);
+}
+
+::deep .search-button {
+    background-image: linear-gradient(to top,#e8e8e8 60%, #c6c6c6 100%);
+    border-radius: 0px;
+}
+
+#expanded-menu {
+    transition: all .5s;
+    flex-grow: 1;
+}
+
+#side-navbar-footer {
+    border-top: 1px solid black;
+    height: 50px;
+    margin: 0px 16px;
+    font-size: 12px;
+    margin-bottom: 45px;
+}
+
+#footer-item {
+    height: fit-content;
+}
+
+.body-content {
+    height: 100%;
+    width: 100%;
 }
 
 .navigator {
@@ -85,21 +132,19 @@
     padding: 1rem 1.5rem;
     display: flex;
     align-items: center;
-    box-shadow: 0px 10px 32px -101px rgba(27,17,17,0.75) inset;
-    position: relative;
-    z-index: -1;
+    background-image: linear-gradient(to top,#e8e8e8 60%, #c6c6c6 100%);
 }
-#expanded-menu {
-    transition: all .5s;
-}
-#hidden-menu {
-    transition: all .5s;
-    display: none;
-}
-#body {
-    height: 100%;
-    width: 100%;
 
+.navigator-item {
+    text-decoration: none;
+    cursor: pointer;
+    color: black;
+    margin-right: 8px;
+}
+
+.content {
+    padding: 1.1rem 1.5rem 0 1.5rem;
+    margin-bottom: 45px;
 }
 
 ::deep .icon {
@@ -111,27 +156,11 @@
     background-repeat: no-repeat;
     background-color: black;
 }
+
 ::deep .icon-menu {
     -webkit-mask-image: url("images/menu.svg");
     mask-image: url("images/menu.svg");
 }
-::deep .toggle-button {
-    background-color: white;
-    border: white;
-    border-radius: 50%/50%;
-    font-size: 25px;
-    width:40px;
-    height:40px;
-}
-
-    ::deep .toggle-button:hover {
-        background-color:lightblue;
-        border: white;
-        border-radius: 50%/50%;
-        font-size: 25px;
-        width: 40px;
-        height: 40px;
-    }
 
 ::deep .icon-search {
     -webkit-mask-image: url("images/search.svg");
@@ -141,16 +170,8 @@
     margin-right:4px;
 }
 
-::deep .search-button {
-    background-color: #ececec;
-}
-
-
-.navigator-item {
-    text-decoration: none;
-    color: black;
-    margin-right: 8px;
-}
-.content {
-    padding: 1.1rem 1.5rem 0 1.5rem;
+@media (max-width: 1000px) {
+    #body-side-navbar {
+        width: 0px;
+    }
 }

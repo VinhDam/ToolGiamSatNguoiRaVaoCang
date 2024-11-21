@@ -3,7 +3,7 @@
 @rendermode InteractiveServer
 @inject ApplicationDbContext _db
 
-<h5 style="margin: 0;padding: 0;">Danh sách nhà thầu</h5>
+<h5 style="margin: 0;padding: 0;">Danh sách ca làm việc</h5>
 
 <EditForm Model="Shift"
           OnValidSubmit="SaveItem"
@@ -54,10 +54,10 @@
                             CssClass="cw-480"
                             InputId="cbVirtualScrolling" />
             </DxFormLayoutItem>
-            <DxFormLayoutItem Caption="Giờ bắt đầu" CaptionPosition="CaptionPosition.Vertical" CssClass="time-box">
+            <DxFormLayoutItem Caption="Giờ bắt đầu" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
                 <DxTimeEdit @bind-Time="@Shift.StartHour" />
             </DxFormLayoutItem>
-            <DxFormLayoutItem Caption="Giờ kết thúc" CaptionPosition="CaptionPosition.Vertical" CssClass="time-box">
+            <DxFormLayoutItem Caption="Giờ kết thúc" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
                 <DxTimeEdit @bind-Time="@Shift.EndHour" />
             </DxFormLayoutItem>
             <DxFormLayoutItem ColSpanMd="3">
@@ -111,6 +111,11 @@
             ShowFilterRow="true"
             FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always" >
         <Columns>
+            <DxGridDataColumn Caption="STT" Width="50px" TextAlignment="GridTextAlignment.Center" CaptionAlignment="GridTextAlignment.Center">
+                <CellDisplayTemplate>
+                    @(context.VisibleIndex + 1)
+                </CellDisplayTemplate>
+            </DxGridDataColumn>
             <DxGridDataColumn FieldName="Code" Caption="Mã ca làm việc" />
             <DxGridDataColumn FieldName="Name" Caption="Ca làm việc" />
             <DxGridDataColumn FieldName="Description" Caption="Mô tả" />
@@ -127,7 +132,7 @@
                 </CellDisplayTemplate>
             </DxGridDataColumn>
             <DxGridDataColumn FieldName="StartHour" Caption="Giờ bắt đầu" Width="130px"/>
-            <DxGridDataColumn FieldName="EndHour" Caption="Giờ bắt đầu" Width="130px" />
+            <DxGridDataColumn FieldName="EndHour" Caption="Giờ kết thúc" Width="130px" />
             <DxGridDataColumn Caption="Action" TextAlignment="GridTextAlignment.Center" CaptionAlignment="GridTextAlignment.Center" Width="75px">
                 <CellDisplayTemplate>
                     <a class="oi oi-trash" @onclick="@(() => Grid.ShowRowDeleteConfirmation(context.VisibleIndex))" style="text-decoration:none;cursor: pointer;" />

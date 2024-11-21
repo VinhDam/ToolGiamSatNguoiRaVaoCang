@@ -105,6 +105,11 @@
             ShowFilterRow="true"
             FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always" >
         <Columns>
+            <DxGridDataColumn Caption="STT" Width="50px" TextAlignment="GridTextAlignment.Center" CaptionAlignment="GridTextAlignment.Center">
+                <CellDisplayTemplate>
+                    @(context.VisibleIndex+1)
+                </CellDisplayTemplate>
+            </DxGridDataColumn>
             <DxGridDataColumn FieldName="Code" Caption="Mã nhà thầu" />
             <DxGridDataColumn FieldName="Name" Caption="Tên nhà thầu" />
             <DxGridDataColumn FieldName="Description" Caption="Mô tả" />

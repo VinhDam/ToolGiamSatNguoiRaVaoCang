@@ -10,16 +10,18 @@
 
 <div class="page">
     <div class="header">
+        <div class="header-item toggle-button-container">
+            <button class="toggle-button bi bi-list" onclick="MenuToggle()" />
+        </div>
+        <div class="header-item logo">
+            <img src="/images/logo.png" width="97px" height="35px" alt="logo"/>
+        </div>
         <div class="header-item">
-            <div>
-                <button class="toggle-button bi bi-list" onclick="MenuToggle()" />
-            </div>
-            <div>
-                <img src="~/images/logo.svg" />
-            </div>
-            <div>
-                <div class="title">LAIP</div>
-            </div>
+            <NavLink href="/" class="nav-link">
+                <DxButton RenderStyle="ButtonRenderStyle.None" 
+                          Text="LAIP" 
+                          CssClass="title"/>
+            </NavLink>
         </div>
         <div class="flex-space header-item" />
         <AuthorizeView Context="AuthContext">
@@ -27,10 +29,10 @@
                 <div class="header-item header-item-right">
                     <NavLink href="Account/Manage">
                         <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                        Text="@AuthContext.User.Identity?.Name"
-                        CssClass="menu-button-nav"
-                        RenderStyleMode="@ButtonRenderStyleMode.Contained"
-                        IconCssClass="bi bi-person-circle"></DxButton>
+                                  Text="@AuthContext.User.Identity?.Name"
+                                  CssClass="menu-button-nav"
+                                  RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                                  IconCssClass="bi bi-person-circle"></DxButton>
                     </NavLink>
                 </div>
                 <div class="header-item header-item-right">
@@ -38,10 +40,10 @@
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="" />
                         <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                        SubmitFormOnClick="true" Text="Log out"
-                        RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                        CssClass="menu-button-nav"
-                        IconCssClass="bi bi-box-arrow-left"></DxButton>
+                                  SubmitFormOnClick="true" Text="Log out"
+                                  RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                                  CssClass="menu-button-nav"
+                                  IconCssClass="bi bi-box-arrow-left"></DxButton>
                     </form>
 
                 </div>
@@ -50,32 +52,32 @@
                 <div class="header-item header-item-right">
                     <NavLink href="Account/Register">
                         <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                        Text="Register"
-                        RenderStyleMode="@ButtonRenderStyleMode.Contained"
-                        CssClass="menu-button-nav"
-                        IconCssClass="bi bi-r-circle"></DxButton>
+                                  Text="Register"
+                                  RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                                  CssClass="menu-button-nav"
+                                  IconCssClass="bi bi-r-circle"></DxButton>
                     </NavLink>
                 </div>
                 <div class="header-item header-item-right">
                     <NavLink href="Account/Login">
                         <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                        Text="Log in"
-                        RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                        CssClass="menu-button-nav"
-                        IconCssClass="bi bi-box-arrow-in-right"></DxButton>
+                                  Text="Log in"
+                                  RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                                  CssClass="menu-button-nav"
+                                  IconCssClass="bi bi-box-arrow-in-right"></DxButton>
                     </NavLink>
                 </div>
             </NotAuthorized>
         </AuthorizeView>
     </div>
     <div class="body">
-        <div id="side-navbar">
+        <div id="body-side-navbar">
             <div id="search-box-area">
                 <DxTextBox @bind-Text="@searchText"
-                BindValueMode="BindValueMode.OnInput"
-                NullText="Tìm kiếm"
-                CssClass="search-box"
-                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
+                           BindValueMode="BindValueMode.OnInput"
+                           NullText="Tìm kiếm"
+                           CssClass="search-box" 
+                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
                     <Buttons>
                         <DxEditorButton IconCssClass="icon icon-search" CssClass="search-button" />
                     </Buttons>
@@ -87,18 +89,23 @@
                         <DxTreeViewNode NavigateUrl="/" Text="Công ty" />
                         <DxTreeViewNode Text="Danh mục">
                             <Nodes>
-                                <DxTreeViewNode NavigateUrl="/company" Text="Công ty" AllowSelection="true"/>
+                                <DxTreeViewNode NavigateUrl="/company" Text="Công ty" AllowSelection="true" />
                                 <DxTreeViewNode NavigateUrl="/shift" Text="Ca làm việc" AllowSelection="true" />
                             </Nodes>
                         </DxTreeViewNode>
                     </Nodes>
                 </DxTreeView>
             </div>
+            <div id="side-navbar-footer">
+                <div id="footer-item-1">Version: 1.0</div>
+                <div id="footer-item-2">Copyright: © 2024-2025</div>
+            </div>
         </div>
-        <div id="body">
+        <div class="body-content">
             <div class="navigator">
                 <a href="/" class="navigator-item">Home</a>
-                @if (breadcrumb!=null){
+                @if (breadcrumb != null)
+                {
                     <i class="bi bi-caret-right-fill navigator-item"></i>
                     <a class="navigator-item">@breadcrumb.ParentName</a>
                     <i class="bi bi-caret-right-fill navigator-item"></i>
@@ -115,17 +122,11 @@
 
 <script>
     function MenuToggle(){
-    if(document.getElementById("side-navbar").style.width!="0px"){
-    document.getElementById("side-navbar").style.width="0px";
-    document.getElementById("search-box-area").style.width="0px";
-    document.getElementById("search-box").style.width="0px";
-    document.getElementById("expanded-menu").style.width="0px";
-    }else{
-    document.getElementById("side-navbar").style.width="330px";
-    document.getElementById("search-box-area").style.width="auto";
-    document.getElementById("search-box").style.width="auto";
-    document.getElementById("expanded-menu").style.width="auto";
-    }
+        if(document.getElementById("body-side-navbar").style.width!="0px"){
+            document.getElementById("body-side-navbar").style.width="0px";
+        }else{
+            document.getElementById("body-side-navbar").style.width="330px";
+        }
     }
 
 </script>
@@ -145,7 +146,8 @@
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         breadcrumb = null;
-        @if (!string.IsNullOrEmpty(currentUrl)){
+        @if (!string.IsNullOrEmpty(currentUrl))
+        {
             breadcrumb = BreadCrumbList.Where(u => u.EngName.Contains(currentUrl, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
         }
         StateHasChanged();
