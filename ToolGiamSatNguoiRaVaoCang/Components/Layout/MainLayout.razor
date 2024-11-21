@@ -1,11 +1,13 @@
 ﻿@using BlazorBootstrap
 @using DevExpress.Blazor.Internal
+@using ToolGiamSatNguoiRaVaoCang.Services
 @using ToolGiamSatNguoiRaVaoCang.StaticData
 @using ToolGiamSatNguoiRaVaoCang.Utilities
 @implements IDisposable
 @inject IJSRuntime _JS
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
+@inject ResizeListener resizeListener
 
 
 <div class="page">
@@ -14,12 +16,12 @@
             <button class="toggle-button bi bi-list" onclick="MenuToggle()" />
         </div>
         <div class="header-item logo">
-            <NavLink href="/" class="nav-link">
-                <img src="/images/logo.png" width="97px" height="35px" alt="logo" />
+            <NavLink href="@UrlGenerator.GetUrl("/", true)" class="nav-link">
+                <img src="/images/logo.png" width="97" height="35" alt="logo" />
             </NavLink>
         </div>
         <div class="header-item">
-            <NavLink href="/" class="nav-link">
+            <NavLink href="@UrlGenerator.GetUrl("/", true)" class="nav-link">
                 <DxButton RenderStyle="ButtonRenderStyle.None"
                 Text="LAIP"
                 CssClass="title" />
@@ -74,7 +76,7 @@
     </div>
     <div class="body">
         <div id="body-side-navbar">
-            <div id="search-box-area">
+            <div id="search-box-area" class="smallScreen">
                 <DxTextBox @bind-Text="@searchText"
                 BindValueMode="BindValueMode.OnInput"
                 NullText="Tìm kiếm"
@@ -105,7 +107,7 @@
         </div>
         <div id="body-content">
             <div class="navigator">
-                <a href="/" class="navigator-item">Home</a>
+                <a href="@UrlGenerator.GetUrl("/", true)" class="navigator-item">Home</a>
                 @if (breadcrumb != null)
                 {
                     <i class="bi bi-caret-right-fill navigator-item"></i>
@@ -124,21 +126,22 @@
 
 <script>
     function MenuToggle(){
-    if(document.getElementById("body-side-navbar").style.width!="0px"){
-    if(window.matchMedia("(max-width: 1000px)").matches){
+    if(document.getElementById("body-side-navbar").style.width!="0px"){     /* Rút */
+    if(window.matchMedia("(max-width: 777px)").matches){
     document.getElementById("body-side-navbar").style.width="0px";
     document.getElementById("body-content").style.width = "100%";
     }else{
     document.getElementById("body-side-navbar").style.width="0px";
     }
-    }else{
-    if(window.matchMedia("(max-width: 1000px)").matches){
+    }else{                                                                  /* Xả */
+    if(window.matchMedia("(max-width: 777px)").matches){
     document.getElementById("body-side-navbar").style.width="100%";
     document.getElementById("body-content").style.width = "0px";
     }else{
     document.getElementById("body-side-navbar").style.width="330px";
     }
     }
+
     }
 </script>
 
@@ -147,21 +150,36 @@
 
     private string? currentUrl;
 
+    [SupplyParameterFromQuery(Name = UrlGenerator.ToggleSidebarName)]
+    public bool TitleOnClick { get; set; }
+
     protected override async void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
+        resizeListener.Resize += UpdatedBrowserWidth;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender){
+            resizeListener.Init(_JS);
+        }  
     }
 
     private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
-        await _JS.InvokeVoidAsync("MenuToggle");
         breadcrumb = null;
+        if (!bigWindowSize && !TitleOnClick)
+        {
+            await _JS.InvokeVoidAsync("MenuToggle");
+        }
         @if (!string.IsNullOrEmpty(currentUrl))
         {
             breadcrumb = BreadCrumbList.Where(u => u.EngName.Contains(currentUrl, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
         }
+        TitleOnClick = false;
         StateHasChanged();
     }
 
@@ -178,4 +196,27 @@
             new BreadCrumb {ParentName = "Danh mục", VietName = "Công ty", EngName="Company" },
             new BreadCrumb {ParentName = "Danh mục", VietName = "Ca làm việc", EngName="Shift" }
         };
+}
+
+@code{
+    private static Boolean bigWindowSize = true;
+    protected void UpdatedBrowserWidth(object sender, int width)
+    {
+        if (!bigWindowSize && width >= 777)
+        {
+            bigWindowSize = true;
+        }
+        else if (bigWindowSize && width < 777)
+        {
+            bigWindowSize = false;
+        }
+    }
+}
+
+@code{
+    int sidebarWidth { get; set; }
+    [JSInvokable]
+    private async Task CheckWidth(int width){
+        sidebarWidth = width;
+    }
 }

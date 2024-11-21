@@ -21,7 +21,6 @@ builder.Services.AddDevExpressBlazor(options =>
     options.BootstrapVersion = DevExpress.Blazor.BootstrapVersion.v5;
     options.SizeMode = DevExpress.Blazor.SizeMode.Medium;
 });
-builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddMvc();
 
 builder.Services.AddCascadingAuthenticationState();
@@ -29,6 +28,8 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddBlazorBootstrap();
+builder.Services.AddSingleton<ResizeListener>();
+
 
 builder.Services.AddAuthentication(options =>
 {

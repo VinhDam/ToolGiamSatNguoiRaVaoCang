@@ -175,7 +175,7 @@
     margin-right:4px;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 777px) {
     ::deep .menu-button-nav {
         background-repeat: no-repeat;
         background-position: center;
@@ -191,11 +191,4 @@
         text-indent: -9999px;
         background-image: url("images/box-arrow-in-right.svg");
     }
-}
-
-@media (max-width: 1000px){
-    #body-side-navbar {
-        width: 0px;
-    }
-
 }
