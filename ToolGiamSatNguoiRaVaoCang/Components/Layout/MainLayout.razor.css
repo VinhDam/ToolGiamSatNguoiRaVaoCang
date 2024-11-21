@@ -85,6 +85,20 @@
     overflow: hidden;
 }
 
+.sidebar-hidden {
+    width: 0px !important;
+}
+
+.sidebar-mobile{
+    width: 100% !important;
+}
+
+.content-mobile{
+    display:none !important;
+}
+.content-mobile-show {
+    display: 100% !important;
+}
 #search-box-area {
     transition: all .5s;
     display: flex;
@@ -200,3 +214,4 @@
         background-image: url("images/box-arrow-left.svg");
     }
 }
+

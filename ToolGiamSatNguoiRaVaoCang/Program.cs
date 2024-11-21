@@ -28,7 +28,7 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddBlazorBootstrap();
-builder.Services.AddSingleton<ResizeListener>();
+builder.Services.AddSingleton<SizeListener>();
 
 
 builder.Services.AddAuthentication(options =>

@@ -7,13 +7,13 @@
 @inject IJSRuntime _JS
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
-@inject ResizeListener resizeListener
+@inject SizeListener sizeListener
 
 
 <div class="page">
     <div class="header">
         <div class="header-item toggle-button-container">
-            <button class="toggle-button bi bi-list" onclick="MenuToggle()" />
+            <button class="toggle-button bi bi-list" @onclick="ToggleNavbar" />
         </div>
         <div class="header-item logo">
             <NavLink href="@UrlGenerator.GetUrl("/", true)" class="nav-link">
@@ -75,8 +75,8 @@
         </AuthorizeView>
     </div>
     <div class="body">
-        <div id="body-side-navbar">
-            <div id="search-box-area" class="smallScreen">
+        <div id="body-side-navbar" class="@NavbarStyle">
+            <div id="search-box-area">
                 <DxTextBox @bind-Text="@searchText"
                 BindValueMode="BindValueMode.OnInput"
                 NullText="Tìm kiếm"
@@ -95,6 +95,7 @@
                             <Nodes>
                                 <DxTreeViewNode NavigateUrl="/company" Text="Công ty" AllowSelection="true" />
                                 <DxTreeViewNode NavigateUrl="/shift" Text="Ca làm việc" AllowSelection="true" />
+                                <DxTreeViewNode NavigateUrl="/zonetype" Text="@(bigWindowSize.ToString())" AllowSelection="true" />
                             </Nodes>
                         </DxTreeViewNode>
                     </Nodes>
@@ -105,7 +106,7 @@
                 <div id="footer-item-2">Copyright: © 2024-2025</div>
             </div>
         </div>
-        <div id="body-content">
+        <div id="body-content" class="@ContentStyle">
             <div class="navigator">
                 <a href="@UrlGenerator.GetUrl("/", true)" class="navigator-item">Home</a>
                 @if (breadcrumb != null)
@@ -126,22 +127,21 @@
 
 <script>
     function MenuToggle(){
-    if(document.getElementById("body-side-navbar").style.width!="0px"){     /* Rút */
+    if(document.getElementById("body-side-navbar").style.display==="flex"){     /* Rút */
     if(window.matchMedia("(max-width: 777px)").matches){
-    document.getElementById("body-side-navbar").style.width="0px";
-    document.getElementById("body-content").style.width = "100%";
+    document.getElementById("body-side-navbar").style.display="none";
+    document.getElementById("body-content").style.display="block";
     }else{
-    document.getElementById("body-side-navbar").style.width="0px";
+    document.getElementById("body-side-navbar").style.display="none";
     }
     }else{                                                                  /* Xả */
     if(window.matchMedia("(max-width: 777px)").matches){
-    document.getElementById("body-side-navbar").style.width="100%";
-    document.getElementById("body-content").style.width = "0px";
+    document.getElementById("body-side-navbar").style.display="flex";
+    document.getElementById("body-content").style.display="none";
     }else{
-    document.getElementById("body-side-navbar").style.width="330px";
+    document.getElementById("body-side-navbar").style.display="flex";
     }
     }
-
     }
 </script>
 
@@ -157,14 +157,15 @@
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
-        resizeListener.Resize += UpdatedBrowserWidth;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender){
-            resizeListener.Init(_JS);
-        }  
+        if (firstRender)
+        {
+            sizeListener.Init(_JS);
+            sizeListener.Size += UpdateValue;
+        }
     }
 
     private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -198,25 +199,44 @@
         };
 }
 
-@code{
-    private static Boolean bigWindowSize = true;
-    protected void UpdatedBrowserWidth(object sender, int width)
+@code {
+    string NavbarStyle { get; set; } = string.Empty;
+    string ContentStyle { get; set; } = string.Empty;
+    private static Boolean bigWindowSize = false;
+    private void UpdateValue(object sender, bool isDesktop)
     {
-        if (!bigWindowSize && width >= 777)
-        {
-            bigWindowSize = true;
+        bigWindowSize = isDesktop;
+        if (!isDesktop){
+            NavbarStyle = "sidebar-hidden";
+        }else{
+            NavbarStyle = "";
         }
-        else if (bigWindowSize && width < 777)
-        {
-            bigWindowSize = false;
-        }
+        StateHasChanged();
     }
-}
-
-@code{
-    int sidebarWidth { get; set; }
-    [JSInvokable]
-    private async Task CheckWidth(int width){
-        sidebarWidth = width;
+    private async Task ToggleNavbar()
+    {
+        if (!NavbarStyle.Contains("sidebar-hidden"))
+        {
+            if (!bigWindowSize){
+                NavbarStyle = "sidebar-hidden";
+                ContentStyle = "content-mobile-show";
+            }else{
+                NavbarStyle = "sidebar-hidden";
+                ContentStyle = "";
+            }
+        }
+        else
+        {
+            if (!bigWindowSize)
+            {
+                NavbarStyle = "sidebar-mobile";
+                ContentStyle = "content-mobile";
+            }
+            else
+            {
+                NavbarStyle = "";
+                ContentStyle = "";
+            }
+        }
     }
 }
