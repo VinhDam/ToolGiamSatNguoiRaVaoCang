@@ -156,7 +156,7 @@
 </DxLoadingPanel>
 
 
-
+@* Load trang và data *@
 @code {
     IGrid Grid { get; set; }
     bool ExportSelectedRowsOnly { get; set; }
@@ -182,8 +182,29 @@
         IsProcessing = false;
         StateHasChanged();
     }
+    
+}
+
+@* CRUD *@
+@code{
     private async Task SaveItem()
     {
+        if (SelectedDataItem == null)
+        {
+            PopupTitle = "Xác nhận tạo mới";
+            PopupMessage = "Bạn có muốn tạo mới dữ liệu không?";
+            PopupVisible = true;
+        }
+        else
+        {
+            PopupTitle = "Xác nhận chỉnh sửa";
+            PopupMessage = "Bạn có muốn chỉnh sửa dữ liệu không?";
+            PopupVisible = true;
+        }
+    }
+    private async Task ConfirmSaveItem()
+    {
+        PopupVisible = false;
         if (SelectedDataItem == null)
         {
             await _companyRepository.CreateAsync(Shift);
@@ -194,13 +215,25 @@
             await _companyRepository.UpdateAsync(Shift);
             await Clear();
         }
-
     }
     private async Task Clear()
     {
         Shift = new();
         await LoadCompanies();
     }
+    async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
+    {
+        await _companyRepository.DeleteAsync(((Shift)e.DataItem).Id);
+        await LoadCompanies();
+    }
+    async Task ChooseRowToEdit()
+    {
+        Shift = SelectedDataItem as Shift;
+    }
+}
+
+@* Xuất file excel *@
+@code{
     async Task ExportXlsx_Click()
     {
         await Grid.ExportToXlsxAsync("ExportResult", new GridXlExportOptions()
@@ -208,6 +241,10 @@
                 ExportSelectedRowsOnly = ExportSelectedRowsOnly,
             });
     }
+}
+
+@* trang trí trạng thái và ưu tiên *@
+@code{
     public MarkupString GetIssuePriorityIconHtml(IssuePriority priority)
     {
         string priorytyClass = "warning";
@@ -254,13 +291,22 @@
         statusIconName);
         return new MarkupString(html);
     }
-    async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
-    {
-        await _companyRepository.DeleteAsync(((Shift)e.DataItem).Id);
-        await LoadCompanies();
-    }
-    async Task ChooseRowToEdit()
-    {
-        Shift = SelectedDataItem as Shift;
-    }
+}
+
+<DxPopup @bind-Visible="@PopupVisible"
+         ShowFooter="true"
+         HeaderText="@PopupTitle">
+    <BodyContentTemplate>
+        @PopupMessage
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <DxButton RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Contained" Text="OK" Click="ConfirmSaveItem" />
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary" RenderStyleMode="ButtonRenderStyleMode.Outline" Text="Cancel" Click="@(() => PopupVisible = false)" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    bool PopupVisible { get; set; }
+    string PopupTitle { get; set; } = string.Empty;
+    string PopupMessage { get; set; } = string.Empty;
 }

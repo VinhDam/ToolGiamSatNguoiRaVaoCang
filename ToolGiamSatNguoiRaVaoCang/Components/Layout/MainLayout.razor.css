@@ -76,6 +76,7 @@
 
 #body-side-navbar {
     height: 100%;
+    position: relative;
     width: 330px;
     box-shadow: inset -140px -8px 30px -100px rgba(0, 0, 0, 0.08);
     transition: all 0.5s;
@@ -121,7 +122,7 @@
     height: fit-content;
 }
 
-.body-content {
+#body-content {
     height: 100%;
     width: 100%;
 }
@@ -142,9 +143,14 @@
     margin-right: 8px;
 }
 
+.navigator-item:hover{
+    color: blue;
+}
+
 .content {
     padding: 1.1rem 1.5rem 0 1.5rem;
-    margin-bottom: 45px;
+    height: 100%;
+    overflow:scroll;
 }
 
 ::deep .icon {
@@ -161,7 +167,6 @@
     -webkit-mask-image: url("images/menu.svg");
     mask-image: url("images/menu.svg");
 }
-
 ::deep .icon-search {
     -webkit-mask-image: url("images/search.svg");
     mask-image: url("images/search.svg");
@@ -171,7 +176,26 @@
 }
 
 @media (max-width: 1000px) {
+    ::deep .menu-button-nav {
+        background-repeat: no-repeat;
+        background-position: center;
+        width:40px;
+        height:40px;
+    }
+    ::deep .register {
+        text-indent: -9999px;
+        background-image: url("images/r-circle.svg");
+    }
+
+    ::deep .login {
+        text-indent: -9999px;
+        background-image: url("images/box-arrow-in-right.svg");
+    }
+}
+
+@media (max-width: 1000px){
     #body-side-navbar {
         width: 0px;
     }
+
 }
