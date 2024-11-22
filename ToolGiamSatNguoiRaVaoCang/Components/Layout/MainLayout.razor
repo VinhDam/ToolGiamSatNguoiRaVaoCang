@@ -1,13 +1,14 @@
 ﻿@using BlazorBootstrap
 @using DevExpress.Blazor.Internal
+@using ToolGiamSatNguoiRaVaoCang.DataProvider
 @using ToolGiamSatNguoiRaVaoCang.Services
-@using ToolGiamSatNguoiRaVaoCang.StaticData
 @using ToolGiamSatNguoiRaVaoCang.Utilities
 @implements IDisposable
 @inject IJSRuntime _JS
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 @inject SizeListener sizeListener
+@inject ISearchItemDataProvider searchItemDataProvider
 
 
 <div class="page">
@@ -22,9 +23,9 @@
         </div>
         <div class="header-item">
             <DxButton RenderStyle="ButtonRenderStyle.None"
-                      Text="LAIP"
-                      CssClass="title"
-                      Click="TitleOnClick" NavigateUrl="/"/>
+            Text="LAIP"
+            CssClass="title"
+            Click="TitleOnClick" NavigateUrl="/" />
         </div>
         <div class="flex-space header-item" />
         <AuthorizeView Context="AuthContext">
@@ -32,10 +33,10 @@
                 <div class="header-item header-item-right">
                     <NavLink href="Account/Manage">
                         <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                                  Text="@AuthContext.User.Identity?.Name"
-                                  CssClass="menu-button-nav"
-                                  RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                                  IconCssClass="bi bi-person-circle user"></DxButton>
+                        Text="@AuthContext.User.Identity?.Name"
+                        CssClass="menu-button-nav"
+                        RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                        IconCssClass="bi bi-person-circle user"></DxButton>
                     </NavLink>
                 </div>
                 <div class="header-item header-item-right">
@@ -43,10 +44,10 @@
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="" />
                         <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                                  SubmitFormOnClick="true" Text="Log out"
-                                  RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                                  CssClass="menu-button-nav logout"
-                                  IconCssClass="bi bi-box-arrow-left"></DxButton>
+                        SubmitFormOnClick="true" Text="Log out"
+                        RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                        CssClass="menu-button-nav logout"
+                        IconCssClass="bi bi-box-arrow-left"></DxButton>
                     </form>
 
                 </div>
@@ -55,19 +56,19 @@
                 <div class="header-item header-item-right">
                     <NavLink href="Account/Register">
                         <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                                  Text="Register"
-                                  RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                                  CssClass="menu-button-nav register"
-                                  IconCssClass="bi bi-r-circle"></DxButton>
+                        Text="Register"
+                        RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                        CssClass="menu-button-nav register"
+                        IconCssClass="bi bi-r-circle"></DxButton>
                     </NavLink>
                 </div>
                 <div class="header-item header-item-right">
                     <NavLink href="Account/Login">
                         <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                                  Text="Log in"
-                                  RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                                  CssClass="menu-button-nav login"
-                                  IconCssClass="bi bi-box-arrow-in-right"></DxButton>
+                        Text="Log in"
+                        RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                        CssClass="menu-button-nav login"
+                        IconCssClass="bi bi-box-arrow-in-right"></DxButton>
                     </NavLink>
                 </div>
             </NotAuthorized>
@@ -76,24 +77,59 @@
     <div class="body">
         <div id="body-side-navbar" class="@NavbarStyle">
             <div id="search-box-area">
-                <DxTextBox @bind-Text="@searchText"
-                           BindValueMode="BindValueMode.OnInput"
-                           NullText="Tìm kiếm"
-                           CssClass="search-box"
-                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
+                <DxTextBox Text="@searchText"
+                TextExpression="()=>searchText"
+                BindValueMode="BindValueMode.OnInput"
+                NullText="Tìm kiếm"
+                CssClass="search-box"
+                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                TextChanged="(value)=>GenerateSearchArea(value)">
                     <Buttons>
                         <DxEditorButton IconCssClass="icon icon-search" CssClass="search-button" />
                     </Buttons>
                 </DxTextBox>
             </div>
             <div id="expanded-menu">
+                @if (searchItems.Any())
+                {
+                    @for (int i = 0; i < searchItems.Count; i++)
+                    {
+                        <ul>
+                            <li class="search-result-area">
+                                <div class="item-name" href="/@searchItems[i].ParentName.EngName/@searchItems[i].ItemName.EngName">
+                                    @searchItems[i].ItemName.VietName
+                                </div>
+                                <div class="item-tree">
+                                    <a class="search-item">@searchItems[i].ParentName.VietName</a>
+                                    <i class="bi bi-caret-right-fill search-item"></i>
+                                    <a class="search-item" href="/@searchItems[i].ParentName.EngName/@searchItems[i].ItemName.EngName">
+                                        @searchItems[i].ItemName.VietName
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    }
+                    <hr />
+                }
                 <DxTreeView AnimationType="LayoutAnimationType.Slide">
                     <Nodes>
                         <DxTreeViewNode NavigateUrl="/" Text="Dashboard" />
                         <DxTreeViewNode Text="Danh mục">
                             <Nodes>
-                                <DxTreeViewNode NavigateUrl="/company" Text="Công ty" AllowSelection="true" />
-                                <DxTreeViewNode NavigateUrl="/shift" Text="Ca làm việc" AllowSelection="true" />
+                                <DxTreeViewNode AllowSelection="true" CssClass="treeview-item">
+                                    <Template>
+                                        <DxButton NavigateUrl="/menu/company" Context="btnContext" RenderStyle="ButtonRenderStyle.None" RenderStyleMode="ButtonRenderStyleMode.Text">
+                                            Công ty @StatusDot
+                                        </DxButton>
+                                    </Template>    
+                                </DxTreeViewNode>
+                                <DxTreeViewNode  Text="Ca làm việc" AllowSelection="true" CssClass="treeview-item">
+                                    <Template>
+                                        <DxButton NavigateUrl="/menu/shift" Context="btnContext" RenderStyle="ButtonRenderStyle.None" RenderStyleMode="ButtonRenderStyleMode.Text">
+                                            Ca làm việc   @StatusBadge
+                                        </DxButton>
+                                    </Template>
+                                </DxTreeViewNode>
                             </Nodes>
                         </DxTreeViewNode>
                     </Nodes>
@@ -106,13 +142,13 @@
         </div>
         <div id="body-content" class="@ContentStyle">
             <div class="navigator">
-                <a href="@UrlGenerator.GetUrl("/", true)" class="navigator-item">Home</a>
+                <a href="/" class="navigator-item">Home</a>
                 @if (breadcrumb != null)
                 {
                     <i class="bi bi-caret-right-fill navigator-item"></i>
-                    <a class="navigator-item">@breadcrumb.ParentName</a>
+                    <a class="navigator-item">@breadcrumb.ParentName.VietName</a>
                     <i class="bi bi-caret-right-fill navigator-item"></i>
-                    <a class="navigator-item">@breadcrumb.VietName</a>
+                    <a class="navigator-item">@breadcrumb.ItemName.VietName</a>
                 }
             </div>
             <div class="content">
@@ -122,9 +158,9 @@
     </div>
 </div>
 
-@code {
-    public string? searchText { get; set; }
 
+
+@code {
     private string? currentUrl;
 
     protected override async void OnInitialized()
@@ -137,6 +173,8 @@
     {
         if (firstRender)
         {
+            Items = searchItemDataProvider.GenerateSearchItemDatas();
+
             sizeListener.Init(_JS);
             sizeListener.Size += UpdateValue;
         }
@@ -144,16 +182,18 @@
 
     private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
-        breadcrumb = null;
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location); ;
         if (!NavbarStyle.Contains("sidebar-hidden") && !bigWindowSize)
         {
             NavbarStyle = "sidebar-hidden";
             ContentStyle = "content-mobile-show";
         }
+        breadcrumb = null;
         @if (!string.IsNullOrEmpty(currentUrl))
         {
-            breadcrumb = BreadCrumbList.Where(u => u.EngName.Contains(currentUrl, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+            breadcrumb = Items.Where(u => currentUrl.Contains(u.ItemName.EngName, StringComparison.OrdinalIgnoreCase) ||
+                                                currentUrl.Contains(u.ParentName.EngName, StringComparison.OrdinalIgnoreCase) ||
+                                                currentUrl.Contains(u.RootName.EngName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
         }
         StateHasChanged();
     }
@@ -165,12 +205,18 @@
 }
 
 @code {
-    public BreadCrumb breadcrumb { get; set; }
-    public List<BreadCrumb> BreadCrumbList { get; set; } = new List<BreadCrumb>
-        {
-            new BreadCrumb {ParentName = "Danh mục", VietName = "Công ty", EngName="Company" },
-            new BreadCrumb {ParentName = "Danh mục", VietName = "Ca làm việc", EngName="Shift" }
-        };
+    public List<SearchItem> Items = new List<SearchItem>();
+    public List<SearchItem> searchItems = new List<SearchItem>();
+    string? searchText { get; set; }
+    public SearchItem breadcrumb = null;
+    private async Task GenerateSearchArea(string searchtext)
+    {
+        searchText = searchtext;
+        searchItems = new();
+        if (!string.IsNullOrEmpty(searchtext)){
+            searchItems = Items.Where(u => u.ItemName.VietName.Contains(searchtext, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
 }
 
 @code {
@@ -230,4 +276,9 @@
             ContentStyle = "content-mobile-show";
         }
     }
+}
+
+@code{
+    MarkupString StatusDot { get; set; } = new MarkupString("<span class='status-icon me-1 rounded-circle d-inline-block' b-v2bewct92u></span>");
+    MarkupString StatusBadge { get; set; } = new MarkupString("<span class='badge priority-new' title='Ưu tiên {1}' b-v2bewct92u>New</span>");
 }

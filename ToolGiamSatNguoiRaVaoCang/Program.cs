@@ -9,6 +9,7 @@ using ToolGiamSatNguoiRaVaoCang.Repository.IRepository;
 using ToolGiamSatNguoiRaVaoCang.Repository;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components;
+using ToolGiamSatNguoiRaVaoCang.DataProvider;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,7 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddSingleton<SizeListener>();
+builder.Services.AddSingleton<ISearchItemDataProvider, SearchItemDataProvider>();
 
 
 builder.Services.AddAuthentication(options =>
