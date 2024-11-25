@@ -1,0 +1,52 @@
+﻿@using ToolGiamSatNguoiRaVaoCang.DataProvider
+@inject NavigationManager NavigationManager
+@inject ISearchItemDataProvider searchItemDataProvider
+
+<div class="navigator">
+    <a href="/" class="navigator-item">Home</a>
+    @if (breadcrumb != null)
+    {
+        <i class="bi bi-caret-right-fill navigator-item"></i>
+        <a class="navigator-item">@breadcrumb.ParentName.VietName</a>
+        @if (!string.IsNullOrEmpty(breadcrumb.ItemName.VietName))
+        {
+            <i class="bi bi-caret-right-fill navigator-item"></i>
+            <a class="navigator-item">@breadcrumb.ItemName.VietName</a>
+        }
+    }
+</div>
+
+@code {
+    private string? currentUrl;
+    public SearchItem breadcrumb = null;
+    public List<SearchItem> Items = new List<SearchItem>();
+
+    protected override async void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location); ;
+        breadcrumb = null;
+        List<string> urlStrings = currentUrl.Split('/').ToList();
+        if (!string.IsNullOrEmpty(currentUrl))
+        {
+            if (urlStrings.Count() == 2)
+            {
+                breadcrumb = Items.Where(u => currentUrl.Contains(u.ItemName.EngName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+            }
+            else
+            {
+                breadcrumb = Items.Where(u => currentUrl.Contains(u.ParentName.EngName, StringComparison.OrdinalIgnoreCase) &&
+                                              u.ItemName.EngName == "").FirstOrDefault();
+            }
+        }
+        StateHasChanged();
+    }
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

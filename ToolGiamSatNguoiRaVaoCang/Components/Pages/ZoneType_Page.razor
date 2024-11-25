@@ -1,50 +1,50 @@
-﻿@page "/menu/company"
-@inject ICompanyRepository _companyRepository
+﻿@page "/menu/zonetype"
+@inject IZoneTypeRepository _zonetypeRepository
 @rendermode InteractiveServer
 @inject ApplicationDbContext _db
 
-<h5 style="margin: 0;padding: 0;">Danh sách nhà thầu</h5>
+<h5 style="margin: 0;padding: 0;">Danh sách loại khu vực</h5>
 
-<EditForm Model="Company"
+<EditForm Model="ZoneType"
           OnValidSubmit="SaveItem"
           FormName="EditForm"
           Context="EditFormContext">
     <DataAnnotationsValidator />
     <DxFormLayout CssClass="w-100">
-        <DxFormLayoutGroup Caption="Form cập nhật công ty"
+        <DxFormLayoutGroup Caption="Form cập nhật loại khu vực"
                            ExpandButtonDisplayMode="GroupExpandButtonDisplayMode.Start"
                            AnimationType="LayoutAnimationType.Slide" Expanded="@IsExpanded"
                            ColSpanLg="12">
-            <DxFormLayoutItem Caption="Mã nhà thầu" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
-                <DxTextBox @bind-Text="@Company.Code"
+            <DxFormLayoutItem Caption="Mã loại khu vực" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxTextBox @bind-Text="@ZoneType.Code"
                            NullText="Nhập mã số"
                            BindValueMode="BindValueMode.OnInput"
                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
                            CssClass="cw-480"
-                           InputId="tbCompanyID" />
+                           InputId="tbZoneTypeID" />
             </DxFormLayoutItem>
-            <DxFormLayoutItem Caption="Tên nhà thầu" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="2">
-                <DxTextBox @bind-Text="@Company.Name"
+            <DxFormLayoutItem Caption="Tên loại khu vực" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="2">
+                <DxTextBox @bind-Text="@ZoneType.Name"
                            NullText="Nhập tên công ty"
                            BindValueMode="BindValueMode.OnInput"
                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
                            CssClass="cw-480"
-                           InputId="tbCompanyName" />
+                           InputId="tbZoneTypeName" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Mô tả" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
-                <DxTextBox @bind-Text="@Company.Description"
+                <DxTextBox @bind-Text="@ZoneType.Description"
                            NullText="Nhập mô tả"
                            BindValueMode="BindValueMode.OnInput"
                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                           InputId="tbCompanyDescription"
+                           InputId="tbZoneTypeDescription"
                            CssClass="cw-480" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Trạng thái" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="1">
-                <DxCheckBox @bind-Checked="@Company.Status" />
+                <DxCheckBox @bind-Checked="@ZoneType.Status" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Loại ưu tiên" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
                 <DxComboBox Data="@Priorities"
-                            @bind-Value="@Company.PriorityId"
+                            @bind-Value="@ZoneType.PriorityId"
                             TextFieldName="@nameof(IssuePriority.Name)"
                             ValueFieldName="@nameof(IssuePriority.Id)"
                             NullText="Chọn loại khu vực"
@@ -76,14 +76,14 @@
     </DxFormLayout>
 </EditForm>
 
-<div style="margin: 0;padding: 0;">Tổng số nhà thầu: @Companies.Count()</div>
+<div style="margin: 0;padding: 0;">Tổng số loại khu vực: @ZoneTypes.Count()</div>
 
 <DxLoadingPanel Visible="IsProcessing"
                 IsContentBlocked="true"
                 ApplyBackgroundShading="true"
-                IndicatorAreaVisible="false" 
+                IndicatorAreaVisible="false"
                 Text="Fetching Data...">
-    <DxGrid Data="Companies"
+    <DxGrid Data="ZoneTypes"
             @ref="Grid"
             CssClass="ch-360"
             ShowSearchBox="true"
@@ -110,22 +110,22 @@
                     @(context.VisibleIndex + 1)
                 </CellDisplayTemplate>
             </DxGridDataColumn>
-            <DxGridDataColumn FieldName="Code" Caption="Mã nhà thầu" MinWidth="200" />
-            <DxGridDataColumn FieldName="Name" Caption="Tên nhà thầu" MinWidth="200" />
+            <DxGridDataColumn FieldName="Code" Caption="Mã loại khu vực" MinWidth="200" />
+            <DxGridDataColumn FieldName="Name" Caption="Tên loại khu vực" MinWidth="200" />
             <DxGridDataColumn FieldName="Description" Caption="Mô tả" MinWidth="200" />
-            <DxGridDataColumn FieldName="Status" Caption="Trạng thái" TextAlignment="GridTextAlignment.Left" Width="120">
+            <DxGridDataColumn FieldName="Status" Caption="Trạng thái" TextAlignment="GridTextAlignment.Left" MinWidth="120">
                 <CellDisplayTemplate>
-                    @GetIssueStatusIcon(((Company)context.DataItem).Status,
-                             ((Company)context.DataItem).CreateDate,
-                             ((Company)context.DataItem).UpdateDate)
+                    @GetIssueStatusIcon(((ZoneType)context.DataItem).Status,
+                             ((ZoneType)context.DataItem).CreateDate,
+                             ((ZoneType)context.DataItem).UpdateDate)
                 </CellDisplayTemplate>
             </DxGridDataColumn>
-            <DxGridDataColumn FieldName="PriorityId" Caption="Ưu tiên" Width="90">
+            <DxGridDataColumn FieldName="PriorityId" Caption="Ưu tiên" MinWidth="100">
                 <CellDisplayTemplate>
-                    @GetIssuePriorityIconHtml((context.DataItem as Company).Priority)
+                    @GetIssuePriorityIconHtml((context.DataItem as ZoneType).Priority)
                 </CellDisplayTemplate>
             </DxGridDataColumn>
-            <DxGridDataColumn Caption="Action" TextAlignment="GridTextAlignment.Center" CaptionAlignment="GridTextAlignment.Center" Width="75px">
+            <DxGridDataColumn Caption="Action" TextAlignment="GridTextAlignment.Center" CaptionAlignment="GridTextAlignment.Center" MinWidth="75">
                 <CellDisplayTemplate>
                     <a class="oi oi-trash" @onclick="@(() => Grid.ShowRowDeleteConfirmation(context.VisibleIndex))" style="text-decoration:none;cursor: pointer;" />
                 </CellDisplayTemplate>
@@ -153,23 +153,23 @@
     IGrid Grid { get; set; }
     bool ExportSelectedRowsOnly { get; set; }
     public bool IsProcessing { get; set; }
-    private IEnumerable<Company> Companies { get; set; } = new List<Company>();
+    private IEnumerable<ZoneType> ZoneTypes { get; set; } = new List<ZoneType>();
     private List<IssuePriority> Priorities { get; set; } = new List<IssuePriority>();
-    private Company Company { get; set; } = new Company();
+    private ZoneType ZoneType { get; set; } = new ZoneType();
     private object SelectedDataItem { get; set; }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await LoadCompanies();
+            await LoadZoneTypes();
         }
     }
-    private async Task LoadCompanies()
+    private async Task LoadZoneTypes()
     {
         IsProcessing = true;
         StateHasChanged();
         await Task.Delay(1500);
-        Companies = await _companyRepository.GetAllAsync();
+        ZoneTypes = await _zonetypeRepository.GetAllAsync();
         Priorities = await _db.IssuePriority.ToListAsync();
         IsProcessing = false;
         StateHasChanged();
@@ -200,31 +200,31 @@
         PopupVisible = false;
         if (SelectedDataItem == null)
         {
-            await _companyRepository.CreateAsync(Company);
+            await _zonetypeRepository.CreateAsync(ZoneType);
             await Clear();
-            await LoadCompanies();
+            await LoadZoneTypes();
         }
         else
         {
-            await _companyRepository.UpdateAsync(Company);
+            await _zonetypeRepository.UpdateAsync(ZoneType);
             await Clear();
-            await LoadCompanies();
+            await LoadZoneTypes();
         }
     }
     private async Task Clear()
     {
-        Company = new();
+        ZoneType = new();
         SelectedDataItem = null;
     }
     async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
     {
-        await _companyRepository.DeleteAsync(((Company)e.DataItem).Id);
-        await LoadCompanies();
+        await _zonetypeRepository.DeleteAsync(((ZoneType)e.DataItem).Id);
+        await LoadZoneTypes();
     }
     async Task ChooseRowToEdit()
     {
         IsExpanded = true;
-        Company = SelectedDataItem as Company;
+        ZoneType = SelectedDataItem as ZoneType;
     }
 }
 
@@ -300,6 +300,7 @@
         <DxButton RenderStyle="ButtonRenderStyle.Secondary" RenderStyleMode="ButtonRenderStyleMode.Outline" Text="Cancel" Click="@(() => PopupVisible = false)" />
     </FooterContentTemplate>
 </DxPopup>
+
 @code {
     bool PopupVisible { get; set; }
     string PopupTitle { get; set; } = string.Empty;

@@ -1,3 +1,328 @@
 ﻿@page "/"
-<PageTitle>Welcome</PageTitle>
+@using System.Drawing
+@inject IPersonRepository _personRepository
+@inject ICompanyRepository _companyRepository
+@inject IShiftRepository _shiftRepository
+@inject IZoneRepository _zoneRepository
+@inject IZoneTypeRepository _zoneTypeRepository
 
+<PageTitle>LAIP</PageTitle>
+
+<DxFormLayout>
+    <DxFormLayoutGroup Caption="Lọc dữ liệu"
+                       ExpandButtonDisplayMode="GroupExpandButtonDisplayMode.Start"
+                       AnimationType="LayoutAnimationType.Slide"
+                       Expanded="false">
+        <Items>
+            <DxFormLayoutItem Caption="Ngày" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="3">
+                <DxDateRangePicker @bind-StartDate="@StartDate"
+                                   @bind-EndDate="@EndDate"
+                                   ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                   CssClass="cw-320"
+                                   InputId="deOverview" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Khu vực:" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxComboBox Data="@ZoneTypes"
+                            NullText="Tất cả"
+                            SearchMode="@ListSearchMode.AutoSearch"
+                            SearchFilterCondition="ListSearchFilterCondition.Contains"
+                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                            TextFieldName="@nameof(ZoneType.Name)"
+                            ValueFieldName="@nameof(ZoneType.Id)"
+                            @bind-Value="@ZoneTypeId">
+                    <Columns>
+                        <DxListEditorColumn FieldName="@nameof(ZoneType.Code)" Caption="ZoneTypeID" />
+                        <DxListEditorColumn FieldName="@nameof(ZoneType.Name)" Caption="ZoneType Name" />
+                    </Columns>
+                </DxComboBox>
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Ca làm việc:" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxComboBox Data="@Shifts"
+                            NullText="Tất cả"
+                            SearchMode="@ListSearchMode.AutoSearch"
+                            SearchFilterCondition="ListSearchFilterCondition.Contains"
+                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                            TextFieldName="@nameof(Shift.Name)"
+                            ValueFieldName="@nameof(Shift.Id)"
+                            @bind-Value="@ShiftId">
+                    <Columns>
+                        <DxListEditorColumn FieldName="@nameof(Shift.Name)" Caption="ShiftName" />
+                        <DxListEditorColumn FieldName="@nameof(Shift.StartHour)" Caption="Start Hours" />
+                        <DxListEditorColumn FieldName="@nameof(Shift.EndHour)" Caption="End Hours" />
+                    </Columns>
+                </DxComboBox>
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Công ty:" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxComboBox Data="@Companies"
+                            NullText="Tất cả"
+                            SearchMode="@ListSearchMode.AutoSearch"
+                            SearchFilterCondition="ListSearchFilterCondition.Contains"
+                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                            TextFieldName="@nameof(Company.Name)"
+                            ValueFieldName="@nameof(Company.Id)"
+                            @bind-Value="@CompanyId">
+                    <Columns>
+                        <DxListEditorColumn FieldName="@nameof(Shift.Id)" Caption="ShiftName" />
+                        <DxListEditorColumn FieldName="@nameof(Shift.Name)" Caption="Start Hours" />
+                    </Columns>
+                </DxComboBox>
+            </DxFormLayoutItem>
+            <DxFormLayoutItem ColSpanLg="2">
+                <DxButton Click="Filter" Text="Tìm kiếm" RenderStyleMode="@ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Info" IconCssClass="filterbutton-icon filterbutton-icon-look-up"></DxButton>
+            </DxFormLayoutItem>
+        </Items>
+    </DxFormLayoutGroup>
+</DxFormLayout>
+
+<div class="row">
+    <div class="col-lg-6 col-xs-12">
+        @if (pieChartDatas.Any())
+        {
+            <DxPieChart Data="@pieChartDatas"
+                        Diameter="diameter"
+                        InnerDiameter="innerDiameter"
+                        StartAngle="startAngle"
+                        SegmentDirection="PieChartSegmentDirection.Clockwise"
+                        T="PieChartData"
+                        PointSelectionMode="ChartSelectionMode.Multiple"
+                        SelectionChanged="@OnSelectionChanged"
+                        CustomizeSeriesPoint="@CustomizePiePoint">
+                <DxPieChartSeries T="PieChartData"
+                                  TArgument="string"
+                                  TValue="double"
+                                  ValueField="si => si.AmountOfPeople"
+                                  ArgumentField="si => si.ZoneTypeName"
+                                  SummaryMethod="Enumerable.Sum"
+                                  Filter="si=>si.AmountOfPeople>0">
+                    <DxChartSeriesLabel Visible="showLabels"
+                                        Position="RelativePosition.Outside"
+                                        ValueFormat="ChartElementFormat.LargeNumber()">
+                        <DxChartSeriesLabelConnector Visible="true" />
+                    </DxChartSeriesLabel>
+                </DxPieChartSeries>
+                <DxChartTooltip Enabled="true"
+                                Position="RelativePosition.Outside">
+                    <div style="margin: 0.75rem">
+                        <div class="fw-bold">@context.Point.Argument</div>
+                        <div>Số người: @($"{context.Point.Value:#,0.}")</div>
+                    </div>
+                </DxChartTooltip>
+                <DxChartTitle Text="Tổng số người">
+                    <DxChartSubTitle Text="@TongSoNguoi.ToString()" />
+                </DxChartTitle>
+                <DxChartLegend HorizontalAlignment="HorizontalAlignment.Center"
+                               VerticalAlignment="VerticalEdge.Bottom"
+                               Position="RelativePosition.Outside"
+                               Orientation="Orientation.Horizontal" />
+            </DxPieChart>
+        }
+        else
+        {
+            if (IsLoading)
+            {
+                <DxLoadingPanel Visible="true"
+                                IsContentBlocked="true"
+                                IndicatorAreaVisible="false" />
+            }
+            else
+            {
+                <p>Không có dữ liệu Pie chart</p>
+            }
+        }
+
+    </div>
+    <div class="col-lg-6 col-xs-12">
+        @if (barChartDatas.Any())
+        {
+            <DxChart @ref="DetailChart"
+                     T="BarChartData"
+                     Data="@barChartDatas"
+                     Width="100%"
+                     CustomizeSeriesPoint="@PreparePointColor">
+                <DxChartBarSeries Data="@barChartDatas"
+                                  T="BarChartData"
+                                  TArgument="string"
+                                  TValue="int"
+                                  ArgumentField="pasi => pasi.ZoneName"
+                                  ValueField="pasi => pasi.AmountOfPeople"
+                                  Filter="pasi=>(Selection.Count()==0 ? true : Selection.Contains(pasi.ZoneTypeName))"
+                                  BarWidth="70">
+                </DxChartBarSeries>
+                <DxChartLegend Visible="false" />
+                <DxChartTooltip Enabled="true"
+                                Position="RelativePosition.Outside">
+                    <div style="margin: 0.75rem">
+                        <div class="fw-bold">@context.Point.Argument</div>
+                        <div>Số lượng: @($"{context.Point.Value} người")</div>
+                    </div>
+                </DxChartTooltip>
+            </DxChart>
+        }
+        else
+        {
+            if (IsLoading)
+            {
+                <DxLoadingPanel Visible="true"
+                                IsContentBlocked="true"
+                                IndicatorAreaVisible="false" />
+            }
+            else
+            {
+                <p>Không có dữ liệu Bar chart</p>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private IEnumerable<Person> People { get; set; } = new List<Person>();
+    private IEnumerable<Company> Companies { get; set; } = new List<Company>();
+    private IEnumerable<Shift> Shifts { get; set; } = new List<Shift>();
+    private IEnumerable<Zone> Zones { get; set; } = new List<Zone>();
+    private IEnumerable<ZoneType> ZoneTypes { get; set; } = new List<ZoneType>();
+
+    private DateTime StartDate { get; set; } = DateTime.Now;
+    private DateTime EndDate { get; set; } = DateTime.Now;
+    private int CompanyId { get; set; }
+    private int ShiftId { get; set; }
+    private int ZoneId { get; set; }
+    private int ZoneTypeId { get; set; }
+
+    private bool IsLoading { get; set; }
+
+    private IEnumerable<Person> FilteredPeople { get; set; } = new List<Person>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadDatas();
+        }
+    }
+    private async Task LoadDatas()
+    {
+        People = await _personRepository.GetAllAsync();
+        Companies = await _companyRepository.GetAllAsync();
+        Shifts = await _shiftRepository.GetAllAsync();
+        Zones = await _zoneRepository.GetAllAsync();
+        ZoneTypes = await _zoneTypeRepository.GetAllAsync();
+    }
+    private async Task Filter()
+    {
+        IsLoading = true;
+        StateHasChanged();
+        FilteredPeople = People.Where(u => (CompanyId == 0 ? true : u.CompanyId == CompanyId) &&
+                                           (ShiftId == 0 ? true : u.ShiftId == ShiftId) &&
+                                           (ZoneTypeId == 0 ? true : u.Zone.ZoneTypeId == ZoneTypeId) &&
+                                            u.StartDate >= StartDate && u.StartDate <= EndDate).ToList();
+        await CreatePieChart();
+        await CreateBarChart();
+        IsLoading = false;
+        StateHasChanged();
+    }
+}
+
+@code {
+    double? diameter = null;
+    double innerDiameter = 0.5;
+    bool showLabels = true;
+    int startAngle = 0;
+
+    private int TongSoNguoi { get; set; } = 0;
+
+    Dictionary<string, Color> mainPalette = new() {
+        { "Bãi", Color.Red },
+        { "Cầu cảng", Color.Orange},
+        { "Trạm cân", Color.Black },
+        { "Cổng", Color.Green },
+        { "Thương vụ", Color.Blue },
+        { "Biên phòng", Color.Brown },
+        { "Bảo vệ ", Color.Purple },
+        { "Căn tin", Color.Pink },
+        { "Kho", Color.Gray },
+        { "Khác", Color.Gold },
+    };
+    class PieChartData
+    {
+        public string ZoneTypeName { get; set; } = "";
+        public int AmountOfPeople = 0;
+    }
+    private List<PieChartData> pieChartDatas { get; set; } = new();
+    private async Task CreatePieChart()
+    {
+        pieChartDatas = new();
+        TongSoNguoi = 0;
+        foreach (var zonetype in ZoneTypes)
+        {
+            PieChartData pieChartData = new();
+            pieChartData.ZoneTypeName = zonetype.Name;
+            foreach (var person in FilteredPeople)
+            {
+                if (pieChartData.ZoneTypeName == person.Zone.ZoneType.Name)
+                {
+                    pieChartData.AmountOfPeople++;
+                }
+            }
+            if (pieChartData.AmountOfPeople > 0)
+            {
+                pieChartDatas.Add(pieChartData);
+            }
+        }
+    }
+}
+
+@code {
+    class BarChartData
+    {
+        public string ZoneTypeName { get; set; } = "";
+        public string ZoneName { get; set; } = "";
+        public int AmountOfPeople { get; set; } = 0;
+    }
+    private List<BarChartData> barChartDatas { get; set; } = new();
+    private async Task CreateBarChart()
+    {
+        barChartDatas = new();
+        foreach (var zone in Zones)
+        {
+            BarChartData barChartData = new();
+            barChartData.ZoneName = zone.Name;
+            barChartData.ZoneTypeName = zone.ZoneType.Name;
+            foreach (var person in FilteredPeople)
+            {
+                if (person.Zone.Name == zone.Name)
+                {
+                    barChartData.AmountOfPeople++;
+                }
+            }
+            if (barChartData.AmountOfPeople > 0)
+            {
+                barChartDatas.Add(barChartData);
+            }
+        }
+    }
+    DxChart DetailChart;
+    readonly List<string> FilteredZones = new List<string>() {
+        "Bãi", "Cầu cảng", "Trạm cân", "Cổng", "Thương vụ", "Biên phòng", "Bảo vệ ", "Căn tin", "Kho", "Khác"
+    };
+    readonly List<string> Selection = new();
+    void OnSelectionChanged(PieChartSelectionChangedEventArgs e)
+    {
+        string zonetype = e.Point.Argument.ToString();
+        if (e.IsPointSelected)
+            Selection.Add(zonetype);
+        else
+            Selection.Remove(zonetype);
+        DetailChart?.RefreshData();
+        StateHasChanged();
+    }
+    void CustomizePiePoint(ChartSeriesPointCustomizationSettings settings)
+    {
+        settings.PointAppearance.Color = mainPalette[settings.Point.Argument.ToString()];
+    }
+    protected void PreparePointColor(ChartSeriesPointCustomizationSettings pointSettings)
+    {
+        string value = (string)pointSettings.Point.Argument;
+        string zonetype = Zones.Single(e => e.Name.Equals(value)).ZoneType.Name;
+        pointSettings.PointAppearance.Color = mainPalette[zonetype];
+    }
+}

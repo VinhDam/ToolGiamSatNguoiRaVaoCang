@@ -1,0 +1,82 @@
+﻿@page "/menu"
+@inject ICompanyRepository _companyRepository
+@inject IShiftRepository _shiftRepository
+@inject IZoneRepository _zoneRepository
+@inject IZoneTypeRepository _zoneTypeRepository
+
+<h5 style="margin: 0;padding: 0;">Danh mục</h5>
+
+<div class="row mb-3">
+    <div class="col-lg-6 col-xs-12">
+        <a class="menu-item" href="/menu/company">
+            <div class="menu-image">
+                <img src="/images/building.svg" />
+            </div>
+            <div>
+                <h5>Nhà thầu</h5>
+                <span class="menu-info">
+                    Số lượng nhà thầu: @Companies.Count()
+                </span>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-6 col-xs-12">
+        <a class="menu-item" href="/menu/shift">
+            <div class="menu-image">
+                <img src="/images/shift.svg" />
+            </div>
+            <div>
+                <h5>Ca làm việc</h5>
+                <span class="menu-info">
+                    Số lượng ca làm việc: @Shifts.Count()
+                </span>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-6 col-xs-12">
+        <a class="menu-item">
+            <div class="menu-image" href="/menu/zonetype">
+                <img src="/images/zonetype.svg" />
+            </div>
+            <div>
+                <h5>Loại khu vực</h5>
+                <span class="menu-info">
+                    Số lượng loại khu vực: @ZoneTypes.Count()
+                </span>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-6 col-xs-12">
+        <a class="menu-item" href="/menu/zone">
+            <div class="menu-image">
+                <img src="/images/zone.svg" />
+            </div>
+            <div>
+                <h5>Khu vực</h5>
+                <span class="menu-info">
+                    Số lượng khu vực: @Zones.Count()
+                </span>
+            </div>
+        </a>
+    </div>
+</div>
+
+@code {
+    private IEnumerable<Company> Companies { get; set; } = new List<Company>();
+    private IEnumerable<Shift> Shifts { get; set; } = new List<Shift>();
+    private IEnumerable<Zone> Zones { get; set; } = new List<Zone>();
+    private IEnumerable<ZoneType> ZoneTypes { get; set; } = new List<ZoneType>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDatas();
+    }
+    private async Task LoadDatas()
+    {
+        Companies = await _companyRepository.GetAllAsync();
+        Shifts = await _shiftRepository.GetAllAsync();
+        Zones = await _zoneRepository.GetAllAsync();
+        ZoneTypes = await _zoneTypeRepository.GetAllAsync();
+        StateHasChanged();
+    }
+}

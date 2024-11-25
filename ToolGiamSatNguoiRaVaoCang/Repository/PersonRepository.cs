@@ -13,8 +13,10 @@ namespace ToolGiamSatNguoiRaVaoCang.Repository
         {
             _db = db;
         }
-        public async Task<Person> CreateAsync(Person obj)
+        public async Task<Person> CreateAsync(Person obj, string username)
         {
+            obj.UserCreate=username;
+            obj.UserUpdate=username;
             obj.CreateDate = DateTime.Now;
             obj.UpdateDate = obj.CreateDate;
             await _db.Person.AddAsync(obj);
@@ -35,7 +37,7 @@ namespace ToolGiamSatNguoiRaVaoCang.Repository
 
         public async Task<IEnumerable<Person>> GetAllAsync()
         {
-            return await _db.Person.ToListAsync();
+            return await _db.Person.Include(u=>u.Company).Include(u=>u.Zone).Include(u=>u.Shift).ToListAsync();
         }
 
         public async Task<Person> GetAsync(int id)
@@ -48,7 +50,7 @@ namespace ToolGiamSatNguoiRaVaoCang.Repository
             return obj;
         }
 
-        public async Task<Person> UpdateAsync(Person obj)
+        public async Task<Person> UpdateAsync(Person obj, string username)
         {
             var objFromDb = await _db.Person.FirstOrDefaultAsync(u => u.Id == obj.Id);
             if (objFromDb is not null)
@@ -57,6 +59,7 @@ namespace ToolGiamSatNguoiRaVaoCang.Repository
                 objFromDb.Name = obj.Name;
                 objFromDb.Description = obj.Description;
                 objFromDb.UpdateDate = DateTime.Now;
+                objFromDb.UserUpdate = username;
                 _db.Person.Update(objFromDb);
                 await _db.SaveChangesAsync();
                 return objFromDb;

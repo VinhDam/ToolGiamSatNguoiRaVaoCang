@@ -62,3 +62,7 @@
 ::deep .time-box{
     width:fit-content;
 }
+
+.dxbl-loading-panel {
+    max-width: inherit;
+}

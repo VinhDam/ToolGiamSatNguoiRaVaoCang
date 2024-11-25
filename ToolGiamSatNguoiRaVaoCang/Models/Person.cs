@@ -29,6 +29,8 @@ namespace ToolGiamSatNguoiRaVaoCang.Models
         public int? PriorityId { get; set; }
         [ForeignKey("PriorityId")]
         public IssuePriority Priority { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public string UserCreate { get; set; }
         public string UserUpdate { get; set; }
         public DateTime CreateDate { get; set; }

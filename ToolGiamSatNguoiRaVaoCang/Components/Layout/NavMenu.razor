@@ -1,0 +1,21 @@
+﻿﻿<div id="sidebar">         
+    <DxTreeView AnimationType="LayoutAnimationType.Slide" AllowSelectNodes="true" CssClass="menu">
+        <Nodes>
+            <DxTreeViewNode NavigateUrl="/" Text="Dashboard" />
+            <DxTreeViewNode NavigateUrl="/person" Text="Nhân viên" />
+            <DxTreeViewNode Text="Danh mục" NavigateUrl="/menu" AllowSelection="true">
+                <Nodes>
+                    <DxTreeViewNode Text="Công ty" NavigateUrl="/menu/company" AllowSelection="true" CssClass="menu-item" />
+                    <DxTreeViewNode Text="Ca làm việc" NavigateUrl="/menu/shift" BadgeText="New" AllowSelection="true" CssClass="menu-item" />
+                    <DxTreeViewNode Text="Loại khu vực" NavigateUrl="/menu/zonetype" AllowSelection="true" CssClass="menu-item"/>
+                    <DxTreeViewNode Text="Khu vực" NavigateUrl="/menu/zone" BadgeText="New" AllowSelection="true" CssClass="menu-item" />
+                </Nodes>
+            </DxTreeViewNode>
+        </Nodes>
+    </DxTreeView>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = UrlGenerator.ToggleSidebarName)]
+    public bool ToggledSidebar { get; set; }
+}

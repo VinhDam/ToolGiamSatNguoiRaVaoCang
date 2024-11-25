@@ -1,0 +1,392 @@
+﻿@page "/person"
+@inject IPersonRepository _personRepository
+@inject ICompanyRepository _companyRepository
+@inject IShiftRepository _shiftRepository
+@inject IZoneRepository _zoneRepository
+@rendermode InteractiveServer
+@inject ApplicationDbContext _db
+
+<h5 style="margin: 0;padding: 0;">Danh sách nhân viên</h5>
+
+<EditForm Model="PersonForEdit"
+          OnValidSubmit="SaveItem"
+          FormName="EditForm"
+          Context="EditFormContext">
+    <DataAnnotationsValidator />
+    <DxFormLayout CssClass="w-100">
+        <DxFormLayoutGroup Caption="Form cập nhật nhân viên"
+                           ExpandButtonDisplayMode="GroupExpandButtonDisplayMode.Start" Expanded="@IsExpanded"
+                           AnimationType="LayoutAnimationType.Slide"
+                           ColSpanLg="12">
+            <DxFormLayoutItem Caption="Mã nhân viên" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxTextBox @bind-Text="@PersonForEdit.Code"
+                           NullText="Nhập mã nhân viên"
+                           BindValueMode="BindValueMode.OnInput"
+                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                           CssClass="cw-480"
+                           InputId="tbPersonID" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Tên nhân viên" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="2">
+                <DxTextBox @bind-Text="@PersonForEdit.Name"
+                           NullText="Nhập tên nhân viên"
+                           BindValueMode="BindValueMode.OnInput"
+                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                           CssClass="cw-480"
+                           InputId="tbPersonName" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Số điện thoại" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="2">
+                <DxTextBox @bind-Text="@PersonForEdit.Phone"
+                           NullText="Nhập số điện thoại"
+                           BindValueMode="BindValueMode.OnInput"
+                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                           CssClass="cw-480"
+                           InputId="tbPersonName" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="CCCD" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="2">
+                <DxTextBox @bind-Text="@PersonForEdit.CCCD"
+                           NullText="Nhập CCCD"
+                           BindValueMode="BindValueMode.OnInput"
+                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                           CssClass="cw-480"
+                           InputId="tbPersonName" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Mô tả" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxTextBox @bind-Text="@PersonForEdit.Description"
+                           NullText="Nhập mô tả"
+                           BindValueMode="BindValueMode.OnInput"
+                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                           InputId="tbPersonDescription"
+                           CssClass="cw-480" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Nhà thầu" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxComboBox Data="@Companies"
+                            @bind-Value="@PersonForEdit.CompanyId"
+                            TextFieldName="@nameof(Company.Name)"
+                            ValueFieldName="@nameof(Company.Id)"
+                            NullText="Chọn loại khu vực"
+                            SearchMode="@ListSearchMode.AutoSearch"
+                            SearchFilterCondition="@ListSearchFilterCondition.Contains"
+                            ListRenderMode="ListRenderMode.Virtual"
+                            CssClass="cw-480"
+                            InputId="cbVirtualScrolling" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Ca làm việc" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxComboBox Data="@Shifts"
+                            @bind-Value="@PersonForEdit.ShiftId"
+                            TextFieldName="@nameof(Shift.Name)"
+                            ValueFieldName="@nameof(Shift.Id)"
+                            NullText="Chọn loại khu vực"
+                            SearchMode="@ListSearchMode.AutoSearch"
+                            SearchFilterCondition="@ListSearchFilterCondition.Contains"
+                            ListRenderMode="ListRenderMode.Virtual"
+                            CssClass="cw-480"
+                            InputId="cbVirtualScrolling" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Khu vực" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxComboBox Data="@Zones"
+                            @bind-Value="@PersonForEdit.ZoneId"
+                            TextFieldName="@nameof(Zone.Name)"
+                            ValueFieldName="@nameof(Zone.Id)"
+                            NullText="Chọn loại khu vực"
+                            SearchMode="@ListSearchMode.AutoSearch"
+                            SearchFilterCondition="@ListSearchFilterCondition.Contains"
+                            ListRenderMode="ListRenderMode.Virtual"
+                            CssClass="cw-480"
+                            InputId="cbVirtualScrolling" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Ngày bắt đầu" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxDateEdit @bind-Date="@PersonForEdit.StartDate" Format="d" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Ngày kết thúc" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxDateEdit @bind-Date="@PersonForEdit.EndDate" Format="d" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Trạng thái" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="1">
+                <DxCheckBox @bind-Checked="@PersonForEdit.Status" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Loại ưu tiên" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="2">
+                <DxComboBox Data="@Priorities"
+                            @bind-Value="@PersonForEdit.PriorityId"
+                            TextFieldName="@nameof(IssuePriority.Name)"
+                            ValueFieldName="@nameof(IssuePriority.Id)"
+                            NullText="Chọn loại khu vực"
+                            SearchMode="@ListSearchMode.AutoSearch"
+                            SearchFilterCondition="@ListSearchFilterCondition.Contains"
+                            ListRenderMode="ListRenderMode.Virtual"
+                            CssClass="cw-480"
+                            InputId="cbVirtualScrolling" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem ColSpanMd="3">
+                <div class="save-layout">
+                    <div>
+                        <DxButton CssClass="w-100"
+                                  RenderStyle="ButtonRenderStyle.Info"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  SubmitFormOnClick="true"
+                                  Text="Save" />
+                    </div>
+                    <div>
+                        <DxButton CssClass="w-100"
+                                  RenderStyle="ButtonRenderStyle.Info"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  Text="Clear"
+                                  Click="Clear" />
+                    </div>
+                </div>
+            </DxFormLayoutItem>
+        </DxFormLayoutGroup>
+    </DxFormLayout>
+</EditForm>
+
+<div style="margin: 0;padding: 0;">Tổng số nhân viên: @People.Count()</div>
+
+<DxLoadingPanel Visible="IsProcessing"
+                IsContentBlocked="true"
+                ApplyBackgroundShading="true"
+                IndicatorAreaVisible="false"
+                Text="Fetching Data..." >
+    <div class="grid-container">
+        <DxGrid Data="People"
+                @ref="Grid"
+                CssClass="ch-360" 
+                ShowSearchBox="true"
+                ShowGroupPanel="true"
+                PagerPosition="GridPagerPosition.Bottom"
+                PagerVisible="true"
+                PageSizeSelectorVisible="true"
+                PageSizeSelectorAllRowsItemVisible="false"
+                PageSizeSelectorItems="@(new int[] { 25, 50, 75 })"
+                PageSize="25"
+                PagerVisibleNumericButtonCount="5"
+                PagerNavigationMode="PagerNavigationMode.Auto"
+                SelectionMode="GridSelectionMode.Single"
+                @bind-SelectedDataItem="@SelectedDataItem"
+                DataItemDeleting="Grid_DataItemDeleting"
+                AllowSelectRowByClick="true"
+                ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                RowDoubleClick="ChooseRowToEdit"
+                ShowFilterRow="true"
+                FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always" SizeMode="SizeMode.Medium">
+            <Columns>
+                <DxGridDataColumn Caption="STT" Width="50px" TextAlignment="GridTextAlignment.Center" CaptionAlignment="GridTextAlignment.Center">
+                    <CellDisplayTemplate>
+                        @(context.VisibleIndex + 1)
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+                <DxGridDataColumn FieldName="Code" Caption="Mã nhân viên" MinWidth="150" />
+                <DxGridDataColumn FieldName="Name" Caption="Tên nhân viên" MinWidth="180" />
+                <DxGridDataColumn FieldName="Phone" Caption="Số điện thoại" MinWidth="130" />
+                <DxGridDataColumn FieldName="CCCD" Caption="CCCD" MinWidth="100" />
+                <DxGridDataColumn FieldName="Description" Caption="Mô tả" MinWidth="200" />
+                <DxGridDataColumn FieldName="Zone.Name" Caption="Khu vực" MinWidth="120" />
+                <DxGridDataColumn FieldName="Company.Name" Caption="Nhà thầu" MinWidth="140" />
+                <DxGridDataColumn FieldName="Shift.Name" Caption="Ca làm việc" MinWidth="120" />
+                <DxGridDataColumn FieldName="Status" Caption="Trạng thái" TextAlignment="GridTextAlignment.Left" MinWidth="120">
+                    <CellDisplayTemplate>
+                        @GetIssueStatusIcon(((Person)context.DataItem).Status,
+                                 ((Person)context.DataItem).CreateDate,
+                                 ((Person)context.DataItem).UpdateDate)
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+                <DxGridDataColumn FieldName="PriorityId" Caption="Ưu tiên" MinWidth="90">
+                    <CellDisplayTemplate>
+                        @GetIssuePriorityIconHtml((context.DataItem as Person).Priority)
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+                <DxGridDataColumn Caption="Action" TextAlignment="GridTextAlignment.Center" CaptionAlignment="GridTextAlignment.Center" MinWidth="75">
+                    <CellDisplayTemplate>
+                        <a class="oi oi-trash" @onclick="@(() => Grid.ShowRowDeleteConfirmation(context.VisibleIndex))" style="text-decoration:none;cursor: pointer;" />
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+            </Columns>
+            <SearchBoxTemplate>
+                <div class="search-box-template">
+                    <div class="item">
+                        <DxButton SizeMode="SizeMode.Medium" Click="ExportXlsx_Click" Text="Export XLSX" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Info" />
+                    </div>
+                    <div>
+                        <DxTextBox NullText="Tìm kiếm"
+                                   BindValueMode="BindValueMode.OnInput"
+                                   TextChanged="(string? v)=>context.SearchText = v"
+                                   ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                    </div>
+                </div>
+            </SearchBoxTemplate>
+        </DxGrid>
+    </div>
+</DxLoadingPanel>
+
+
+@* Load trang và data *@
+@code {
+    IGrid Grid { get; set; }
+    bool ExportSelectedRowsOnly { get; set; }
+    public bool IsProcessing { get; set; }
+    private IEnumerable<Person> People { get; set; } = new List<Person>();
+    private IEnumerable<Company> Companies { get; set; } = new List<Company>();
+    private IEnumerable<Shift> Shifts { get; set; } = new List<Shift>();
+    private IEnumerable<Zone> Zones { get; set; } = new List<Zone>();
+    private List<IssuePriority> Priorities { get; set; } = new List<IssuePriority>();
+    private Person PersonForEdit { get; set; } = new Person();
+    private object SelectedDataItem { get; set; }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadPeople();
+            await LoadMenu();
+        }
+    }
+    private async Task LoadPeople()
+    {
+        IsProcessing = true;
+        StateHasChanged();
+        await Task.Delay(1500);
+        People = await _personRepository.GetAllAsync();
+        PersonForEdit.StartDate = DateTime.Now;
+        PersonForEdit.EndDate = DateTime.Now;
+        IsProcessing = false;
+        StateHasChanged();
+    }
+    private async Task LoadMenu()
+    {
+        Priorities = await _db.IssuePriority.ToListAsync();
+        Companies = await _companyRepository.GetAllAsync();
+        Shifts = await _shiftRepository.GetAllAsync();
+        Zones = await _zoneRepository.GetAllAsync();
+    }
+}
+
+@* CRUD *@
+@code {
+    private async Task SaveItem()
+    {
+        if (SelectedDataItem == null)
+        {
+            PopupTitle = "Xác nhận tạo mới";
+            PopupMessage = "Bạn có muốn tạo mới dữ liệu không?";
+            PopupVisible = true;
+        }
+        else
+        {
+            PopupTitle = "Xác nhận chỉnh sửa";
+            PopupMessage = "Bạn có muốn chỉnh sửa dữ liệu không?";
+            PopupVisible = true;
+        }
+    }
+    private async Task ConfirmSaveItem()
+    {
+        PopupVisible = false;
+        if (SelectedDataItem == null)
+        {
+            await _personRepository.CreateAsync(PersonForEdit, "admin");
+            await Clear();
+            await LoadPeople();
+        }
+        else
+        {
+            await _personRepository.UpdateAsync(PersonForEdit, "admin");
+            await Clear();
+            await LoadPeople();
+        }
+    }
+    private async Task Clear()
+    {
+        PersonForEdit = new();
+        PersonForEdit.StartDate = DateTime.Now;
+        PersonForEdit.EndDate = DateTime.Now;
+        SelectedDataItem = null;
+    }
+    async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
+    {
+        await _personRepository.DeleteAsync(((Person)e.DataItem).Id);
+        await LoadPeople();
+    }
+    async Task ChooseRowToEdit()
+    {
+        IsExpanded = true;
+        PersonForEdit = SelectedDataItem as Person;
+    }
+}
+
+@* Xuất file excel *@
+@code {
+    async Task ExportXlsx_Click()
+    {
+        await Grid.ExportToXlsxAsync("ExportResult", new GridXlExportOptions()
+            {
+                ExportSelectedRowsOnly = ExportSelectedRowsOnly,
+            });
+    }
+}
+
+@* trang trí trạng thái và ưu tiên *@
+@code {
+    public MarkupString GetIssuePriorityIconHtml(IssuePriority priority)
+    {
+        string priorytyClass = "warning";
+        string title = "Trung bình";
+        if (priority == null)
+        {
+            priorytyClass = "none";
+            title = "Không có";
+            string nullpriority = string.Format("<span class='badge priority-{0}' title='Ưu tiên {1}' b-v2bewct92u>{1}</span>", priorytyClass, title);
+            return new MarkupString(nullpriority);
+        }
+        if (priority.Name == "Cao")
+        {
+            priorytyClass = "danger";
+            title = "Cao";
+        }
+        if (priority.Name == "Thấp")
+        {
+            priorytyClass = "info";
+            title = "Thấp";
+        }
+        string html = string.Format("<span class='badge priority-{0}' title='Ưu tiên {1}' b-v2bewct92u>{1}</span>", priorytyClass, title);
+        return new MarkupString(html);
+    }
+    public MarkupString GetIssueStatusIcon(bool status, DateTime createDate, DateTime updateDate)
+    {
+        string statusIconName = "";
+        if (status)
+        {
+            if (createDate.Date == updateDate.Date && createDate.TimeOfDay == updateDate.TimeOfDay)
+            {
+                statusIconName = "new";
+            }
+            else
+            {
+                statusIconName = "fixed";
+            }
+        }
+        else
+        {
+            statusIconName = "rejected";
+        }
+        string html = string.Format("<span class='status-icon status-icon-{0} me-1 rounded-circle d-inline-block' b-v2bewct92u></span> {0}",
+        statusIconName);
+        return new MarkupString(html);
+    }
+}
+
+<DxPopup @bind-Visible="@PopupVisible"
+         ShowFooter="true"
+         HeaderText="@PopupTitle">
+    <BodyContentTemplate>
+        @PopupMessage
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <DxButton RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Contained" Text="OK" Click="ConfirmSaveItem" />
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary" RenderStyleMode="ButtonRenderStyleMode.Outline" Text="Cancel" Click="@(() => PopupVisible = false)" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    bool PopupVisible { get; set; }
+    string PopupTitle { get; set; } = string.Empty;
+    string PopupMessage { get; set; } = string.Empty;
+}
+
+@code {
+    bool IsExpanded { get; set; } = false;
+}

@@ -20,6 +20,30 @@ namespace ToolGiamSatNguoiRaVaoCang.DataProvider
                     ParentName = new ItemName("Danh mục", "Menu"),
                     RootName = new ItemName("","")
                 },
+                new SearchItem()
+                {
+                    ItemName = new ItemName("Loại khu vực","zonetype"),
+                    ParentName = new ItemName("Danh mục", "Menu"),
+                    RootName = new ItemName("","")
+                },
+                new SearchItem()
+                {
+                    ItemName = new ItemName("Khu vực","zone"),
+                    ParentName = new ItemName("Danh mục", "Menu"),
+                    RootName = new ItemName("","")
+                },
+                new SearchItem()
+                {
+                    ItemName = new ItemName("",""),
+                    ParentName = new ItemName("Nhân viên", "person"),
+                    RootName = new ItemName("","")
+                },
+                new SearchItem()
+                {
+                    ItemName = new ItemName("",""),
+                    ParentName = new ItemName("Danh mục", "menu"),
+                    RootName = new ItemName("","")
+                },
             };
         }
     }

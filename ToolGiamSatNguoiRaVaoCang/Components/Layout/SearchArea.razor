@@ -1,0 +1,74 @@
+﻿@using ToolGiamSatNguoiRaVaoCang.DataProvider
+@inject ISearchItemDataProvider searchItemDataProvider
+
+<div class="search-area">
+    <DxTextBox Text="@searchText"
+               TextExpression="()=>searchText"
+               BindValueMode="BindValueMode.OnInput"
+               NullText="Tìm kiếm"
+               CssClass="search-box"
+               ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+               TextChanged="(value)=>GenerateSearchArea(value)">
+        <Buttons>
+            <DxEditorButton IconCssClass="icon icon-search" CssClass="search-button" />
+        </Buttons>
+    </DxTextBox>
+    @if (searchItems.Any())
+    {
+        @for (int i = 0; i < searchItems.Count; i++)
+        {
+            <ul>
+                <li class="search-result-area">
+                    @if (string.IsNullOrEmpty(searchItems[i].ItemName.VietName))
+                    {
+                        <div class="item-name" href="/@searchItems[i].ParentName.EngName/@searchItems[i].ItemName.EngName">
+                            @searchItems[i].ParentName.VietName
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="item-name" href="/@searchItems[i].ParentName.EngName/@searchItems[i].ItemName.EngName">
+                            @searchItems[i].ItemName.VietName
+                        </div>
+                    }
+                    <div class="item-tree">
+                        <a href="/@searchItems[i].ParentName.EngName" class="search-item">@searchItems[i].ParentName.VietName</a>
+                        @if (!string.IsNullOrEmpty(searchItems[i].ItemName.VietName))
+                        {
+                            <i class="bi bi-caret-right-fill search-item"></i>
+                            <a class="search-item" href="/@searchItems[i].ParentName.EngName/@searchItems[i].ItemName.EngName">
+                                @searchItems[i].ItemName.VietName
+                            </a>
+                        }
+                    </div>
+                </li>
+            </ul>
+        }
+        <hr />
+    }
+</div>
+
+@code {
+    string? searchText { get; set; }
+    public List<SearchItem> Items = new List<SearchItem>();
+    public List<SearchItem> searchItems = new List<SearchItem>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Items = searchItemDataProvider.GenerateSearchItemDatas();
+
+        }
+    }
+    private async Task GenerateSearchArea(string searchtext)
+    {
+        searchText = searchtext;
+        searchItems = new();
+        if (!string.IsNullOrEmpty(searchtext))
+        {
+            searchItems = Items.Where(u => u.ItemName.VietName.Contains(searchtext, StringComparison.OrdinalIgnoreCase) ||
+                                           u.ParentName.VietName.Contains(searchtext, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
+}
