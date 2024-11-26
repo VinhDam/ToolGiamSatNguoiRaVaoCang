@@ -83,5 +83,16 @@
 
 ::deep .dxbl-badge{
     background-color:var(--bs-primary);
-    margin-right: 50px;
+    margin-right: 2.8rem;
+}
+::deep .statusdot .dxbl-treeview-item-text::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    margin-left:10px;
+    top: 12px;
+    background-color: green;
+    border-radius: 50px;
+    display: inline;
+    position:absolute;
 }

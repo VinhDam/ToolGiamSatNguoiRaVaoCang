@@ -32,32 +32,7 @@
 }
 @media (max-width: 1000px){
     ::deep .menu-button-nav {
-        background-repeat: no-repeat;
-        background-position: center;
-        width: 40px;
-        height: 40px;
-    }
-    ::deep .menu-button-nav:hover {
-        background-color:white;
-    }
-
-    ::deep .register {
-        text-indent: -9999px;
-        background-image: url("images/r-circle.svg");
-    }
-
-    ::deep .login {
-        text-indent: -9999px;
-        background-image: url("images/box-arrow-in-right.svg");
-    }
-
-    ::deep .user {
-        text-indent: -9999px;
-        background-image: url("images/person-circle.svg");
-    }
-
-    ::deep .logout {
-        text-indent: -9999px;
-        background-image: url("images/box-arrow-left.svg");
+        width: 35px;
+        height: 35px;
     }
 }

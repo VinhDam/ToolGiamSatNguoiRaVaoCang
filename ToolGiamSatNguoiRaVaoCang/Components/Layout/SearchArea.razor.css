@@ -7,7 +7,7 @@
     box-shadow: inset -140px -8px 30px -100px rgba(0, 0, 0, 0.08);
 }
 ::deep .search-box {
-    height: 51px;
+    height: 45px;
     background-image: linear-gradient(to top,#e8e8e8 60%, #c6c6c6 100%);
 }
 ::deep .icon {

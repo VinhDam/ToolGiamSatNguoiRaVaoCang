@@ -21,6 +21,7 @@
     width: 100%;
     display: flex;
     justify-content: space-between;
+    height:100%;
 }
 
 ::deep .dxbl-drawer > .dxbl-drawer-panel > .dxbl-drawer-body {

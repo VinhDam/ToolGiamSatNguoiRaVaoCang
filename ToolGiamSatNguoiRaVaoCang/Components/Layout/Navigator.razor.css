@@ -1,7 +1,7 @@
 ﻿.navigator {
-    height: 51px;
+    height: 45px;
     background-color: #ececec;
-    padding: 1rem 1.5rem;
+    padding-left: 1.5rem;
     display: flex;
     align-items: center;
     background-image: linear-gradient(to top,#e8e8e8 60%, #c6c6c6 100%);

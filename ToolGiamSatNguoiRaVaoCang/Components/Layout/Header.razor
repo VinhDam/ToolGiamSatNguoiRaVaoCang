@@ -1,10 +1,14 @@
 ﻿@using System.ComponentModel
+@using ToolGiamSatNguoiRaVaoCang.Services
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider GetAuthenticationStateAsync
+@inject SizeListener sizeListener
+@inject IJSRuntime _JS
 
 <div class="page-header">
-    <DxButton Click="ToggleNavbar" 
+    <DxButton Click="ToggleNavbar"
               NavigateUrl="@UrlGenerator.GetUrl(new Uri(NavigationManager.Uri).LocalPath, !IsToggled)"
-              CssClass="menu-button" 
+              CssClass="menu-button"
               IconCssClass="icon icon-menu"
               RenderStyle="@ButtonRenderStyle.Secondary"
               RenderStyleMode="ButtonRenderStyleMode.Text"></DxButton>
@@ -21,18 +25,19 @@
             <div class="header-item-right">
                 <NavLink href="Account/Manage">
                     <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                              Text="@AuthContext.User.Identity?.Name"
+                              Text="@username"
                               CssClass="menu-button-nav"
                               RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                              IconCssClass="bi bi-person-circle user"></DxButton>
+                              IconCssClass="bi bi-person-circle"></DxButton>
                 </NavLink>
                 <form action="Account/Logout" method="post">
                     <AntiforgeryToken />
                     <input type="hidden" name="ReturnUrl" value="" />
                     <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                              SubmitFormOnClick="true" Text="Log out"
+                              SubmitFormOnClick="true"
+                              Text="@logoutButton"
                               RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                              CssClass="menu-button-nav logout"
+                              CssClass="menu-button-nav"
                               IconCssClass="bi bi-box-arrow-left"></DxButton>
                 </form>
             </div>
@@ -41,16 +46,16 @@
             <div class="header-item-right">
                 <NavLink href="Account/Register">
                     <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                              Text="Register"
+                              Text="@registerButton"
                               RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                              CssClass="menu-button-nav register"
+                              CssClass="menu-button-nav"
                               IconCssClass="bi bi-r-circle"></DxButton>
                 </NavLink>
                 <NavLink href="Account/Login">
                     <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                              Text="Log in"
+                              Text="@loginButton"
                               RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                              CssClass="menu-button-nav login"
+                              CssClass="menu-button-nav"
                               IconCssClass="bi bi-box-arrow-in-right"></DxButton>
                 </NavLink>
             </div>
@@ -68,5 +73,42 @@
     private async Task ToggleNavbar()
     {
         await ToggleSidebar.InvokeAsync(IsToggled);
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+            var user = authstate.User;
+            var name = user.Identity.Name;
+
+            sizeListener.Init(_JS);
+            sizeListener.Size += UpdateValue;
+        }
+    }
+    string registerButton { get; set; } = string.Empty;
+    string loginButton { get; set; } = string.Empty;
+    string userButton { get; set; } = string.Empty;
+    string logoutButton { get; set; } = string.Empty;
+
+    string username { get; set; } = string.Empty;
+
+    private void UpdateValue(object sender, bool isDesktop)
+    {
+        if (isDesktop)
+        {
+            registerButton = "Register";
+            loginButton = "Log in";
+            userButton = username;
+            logoutButton = "Log out";
+        }
+        else
+        {
+            registerButton = string.Empty;
+            loginButton = string.Empty;
+            userButton = string.Empty;
+            logoutButton = string.Empty;
+        }
+        StateHasChanged();
     }
 }
