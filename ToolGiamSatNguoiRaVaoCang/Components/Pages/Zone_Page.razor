@@ -3,6 +3,8 @@
 @rendermode InteractiveServer
 @inject ApplicationDbContext _db
 @inject IZoneTypeRepository _zoneTypeRepository
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 <h5 style="margin: 0;padding: 0;">Danh sách khu vực</h5>
 

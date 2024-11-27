@@ -188,3 +188,8 @@
 ::deep .footer {
     box-shadow: inset -140px -8px 30px -100px rgba(0, 0, 0, 0.08);
 }
+.login-info{
+    width:100%;
+    display:flex;
+    justify-content:center;
+}

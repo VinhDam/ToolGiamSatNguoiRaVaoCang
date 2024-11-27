@@ -5,6 +5,9 @@
 @inject IZoneRepository _zoneRepository
 @rendermode InteractiveServer
 @inject ApplicationDbContext _db
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
 
 <h5 style="margin: 0;padding: 0;">Danh sách nhân viên</h5>
 

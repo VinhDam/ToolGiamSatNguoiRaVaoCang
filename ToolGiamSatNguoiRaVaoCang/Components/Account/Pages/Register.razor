@@ -6,10 +6,12 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using ToolGiamSatNguoiRaVaoCang.Data
+@using ToolGiamSatNguoiRaVaoCang.Utilities
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
 @inject SignInManager<ApplicationUser> SignInManager
+@inject RoleManager<IdentityRole> RoleManager
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
@@ -36,6 +38,12 @@
                 </DxFormLayoutItem>
                 <DxFormLayoutItem Caption="Confirm Password" ColSpanMd="12" BeginRow="true">
                     <InteractiveServerTextBox Name="Input.ConfirmPassword" Value="@Input.ConfirmPassword" Password="true" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Role" ColSpanMd="12" BeginRow="true">
+                    <InputSelect @bind-Value="Input.Role" class="form-select">
+                        <option value="@StaticData.Role_User" selected>@StaticData.Role_User</option>
+                        <option value="@StaticData.Role_Admin">@StaticData.Role_Admin</option>
+                    </InputSelect>
                 </DxFormLayoutItem>
                 <DxFormLayoutItem ColSpanMd="12" BeginRow="true">
                     <DxButton CssClass="w-100" SubmitFormOnClick="true" Text="Register"></DxButton>
@@ -65,7 +73,14 @@
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
-    public async Task RegisterUser(EditContext editContext) {
+    private IEnumerable<string> Role_List { get; set; } = new List<string>
+    {
+        StaticData.Role_Admin,
+        StaticData.Role_User
+    };
+
+    public async Task RegisterUser(EditContext editContext)
+    {
         var user = CreateUser();
 
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
@@ -73,12 +88,27 @@
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
         var result = await UserManager.CreateAsync(user, Input.Password);
 
-        if(!result.Succeeded) {
+        if (!result.Succeeded)
+        {
             identityErrors = result.Errors;
             return;
         }
 
         Logger.LogInformation("User created a new account with password.");
+
+        if (!await RoleManager.RoleExistsAsync(StaticData.Role_User))
+        {
+            await RoleManager.CreateAsync(new IdentityRole(StaticData.Role_Admin));
+            await RoleManager.CreateAsync(new IdentityRole(StaticData.Role_User));
+        }
+        if (Input.Role is not null)
+        {
+            await UserManager.AddToRoleAsync(user, Input.Role);
+        }
+        else
+        {
+            await UserManager.AddToRoleAsync(user, StaticData.Role_User);
+        }
 
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
@@ -89,7 +119,8 @@
 
         await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
-        if(UserManager.Options.SignIn.RequireConfirmedAccount) {
+        if (UserManager.Options.SignIn.RequireConfirmedAccount)
+        {
             RedirectManager.RedirectTo(
                 "Account/RegisterConfirmation",
                 new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
@@ -99,23 +130,30 @@
         RedirectManager.RedirectTo(ReturnUrl);
     }
 
-    private ApplicationUser CreateUser() {
-        try {
+    private ApplicationUser CreateUser()
+    {
+        try
+        {
             return Activator.CreateInstance<ApplicationUser>();
-        } catch {
+        }
+        catch
+        {
             throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
                 $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor.");
         }
     }
 
-    private IUserEmailStore<ApplicationUser> GetEmailStore() {
-        if(!UserManager.SupportsUserEmail) {
+    private IUserEmailStore<ApplicationUser> GetEmailStore()
+    {
+        if (!UserManager.SupportsUserEmail)
+        {
             throw new NotSupportedException("The default UI requires a user store with email support.");
         }
         return (IUserEmailStore<ApplicationUser>)UserStore;
     }
 
-    private sealed class InputModel {
+    private sealed class InputModel
+    {
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]
@@ -131,5 +169,7 @@
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
+
+        public string? Role { get; set; }
     }
 }

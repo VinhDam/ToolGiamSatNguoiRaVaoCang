@@ -1,34 +1,45 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 
-<div class="page">
-    <Header ToggleSidebar="(value)=> ToggledSidebar = !value"
-            IsToggled="@ToggledSidebar"></Header>
-    <Drawer DrawerHeader="drawerHeader" DrawerFooter="drawerFooter">
-        <DrawerBody>
-            <NavMenu></NavMenu>
-        </DrawerBody>
-        <DrawerTarget>
-            <Navigator/>
-            <div class="p-2">
-                @Body
-            </div>
-        </DrawerTarget>
-    </Drawer>
-</div>
+<AuthorizeView>
+    <Authorized>
+        <div class="page">
+            <Header ToggleSidebar="(value)=> ToggledSidebar = !value"
+                    IsToggled="@ToggledSidebar"></Header>
+            <Drawer DrawerHeader="drawerHeader" DrawerFooter="drawerFooter">
+                <DrawerBody>
+                    <NavMenu></NavMenu>
+                </DrawerBody>
+                <DrawerTarget>
+                    <Navigator />
+                    <div class="p-2">
+                        @Body
+                    </div>
+                </DrawerTarget>
+            </Drawer>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="p-2">
+            @Body
+        </div>
+        <div class="login-info">
+            Email: admin@gmail.com <br />
+            Password: 123
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     [SupplyParameterFromQuery(Name = UrlGenerator.ToggleSidebarName)]
     public bool ToggledSidebar { get; set; }
 
     private RenderFragment drawerHeader => @<div class="navigation-drawer-header">
-        <SearchArea/>
+        <SearchArea />
     </div>;
-    
+
     private RenderFragment drawerFooter => @<div class="footer">
         <div>Version: 1.0</div>
         <div>Copyright: © 2024-2025</div>
     </div>;
-
-
 }

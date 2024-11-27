@@ -1,7 +1,10 @@
 ﻿@page "/menu/company"
+
 @inject ICompanyRepository _companyRepository
 @rendermode InteractiveServer
 @inject ApplicationDbContext _db
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 <h5 style="margin: 0;padding: 0;">Danh sách nhà thầu</h5>
 
