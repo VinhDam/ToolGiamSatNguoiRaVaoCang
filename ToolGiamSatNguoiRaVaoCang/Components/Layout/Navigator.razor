@@ -29,7 +29,7 @@
     }
     private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location); ;
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         breadcrumb = null;
         List<string> urlStrings = currentUrl.Split('/').ToList();
         if (!string.IsNullOrEmpty(currentUrl))

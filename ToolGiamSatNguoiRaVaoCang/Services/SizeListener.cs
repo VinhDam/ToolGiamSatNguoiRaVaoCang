@@ -10,12 +10,8 @@ namespace ToolGiamSatNguoiRaVaoCang.Services
         private int browserWidth;
         public async void Init(IJSRuntime js)
         {
-            // enforce single invocation            
-            if (JSRuntime == null)
-            {
-                this.JSRuntime = js;
-                await JSRuntime.InvokeAsync<string>("MatchesQuery", "(min-width: 1000px)", DotNetObjectReference.Create(this));
-            }
+            this.JSRuntime = js;
+            await JSRuntime.InvokeAsync<string>("MatchesQuery", "(min-width: 1000px)", DotNetObjectReference.Create(this));
         }
         [JSInvokable]
         public void OnQueryChanged(bool isDesktop)

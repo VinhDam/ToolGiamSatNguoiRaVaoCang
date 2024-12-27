@@ -7,38 +7,38 @@
 
 <div class="page-header">
     <DxButton Click="ToggleNavbar"
-    NavigateUrl="@UrlGenerator.GetUrl(new Uri(NavigationManager.Uri).LocalPath, !IsToggled)"
-    CssClass="menu-button"
-    IconCssClass="icon icon-menu"
-    RenderStyle="@ButtonRenderStyle.Secondary"
-    RenderStyleMode="ButtonRenderStyleMode.Text"></DxButton>
+              NavigateUrl="@UrlGenerator.GetUrl(new Uri(NavigationManager.Uri).LocalPath, !IsToggled)"
+              CssClass="menu-button"
+              IconCssClass="icon icon-menu"
+              RenderStyle="@ButtonRenderStyle.Secondary"
+              RenderStyleMode="ButtonRenderStyleMode.Text"></DxButton>
     <DxButton NavigateUrl="/" RenderStyle="ButtonRenderStyle.None" RenderStyleMode="ButtonRenderStyleMode.Text">
         <img src="/images/logo.png" width="97" height="35" alt="logo" />
     </DxButton>
     <DxButton RenderStyle="ButtonRenderStyle.None"
-    Text="LAIP" CssClass="title"
-    RenderStyleMode="ButtonRenderStyleMode.Text"
-    NavigateUrl="/" />
+              Text="LAIP" CssClass="title"
+              RenderStyleMode="ButtonRenderStyleMode.Text"
+              NavigateUrl="/" />
     <div class="flex-space"></div>
     <AuthorizeView Context="AuthContext">
         <Authorized>
             <div class="header-item-right">
                 <NavLink href="Account/Manage">
                     <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                    Text="@userButton"
-                    CssClass="menu-button-nav"
-                    RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                    IconCssClass="bi bi-person-circle"></DxButton>
+                              Text="@userButton"
+                              CssClass="menu-button-nav"
+                              RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                              IconCssClass="bi bi-person-circle"></DxButton>
                 </NavLink>
                 <form action="Account/Logout" method="post">
                     <AntiforgeryToken />
                     <input type="hidden" name="ReturnUrl" value="" />
                     <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                    SubmitFormOnClick="true"
-                    Text="@logoutButton"
-                    RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                    CssClass="menu-button-nav"
-                    IconCssClass="bi bi-box-arrow-left"></DxButton>
+                              SubmitFormOnClick="true"
+                              Text="@logoutButton"
+                              RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                              CssClass="menu-button-nav"
+                              IconCssClass="bi bi-box-arrow-left"></DxButton>
                 </form>
             </div>
         </Authorized>
@@ -46,17 +46,17 @@
             <div class="header-item-right">
                 <NavLink href="Account/Register">
                     <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                    Text="@registerButton"
-                    RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                    CssClass="menu-button-nav"
-                    IconCssClass="bi bi-r-circle"></DxButton>
+                              Text="@registerButton"
+                              RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                              CssClass="menu-button-nav"
+                              IconCssClass="bi bi-r-circle"></DxButton>
                 </NavLink>
                 <NavLink href="Account/Login">
                     <DxButton RenderStyle="@ButtonRenderStyle.Primary"
-                    Text="@loginButton"
-                    RenderStyleMode="@ButtonRenderStyleMode.Outline"
-                    CssClass="menu-button-nav"
-                    IconCssClass="bi bi-box-arrow-in-right"></DxButton>
+                              Text="@loginButton"
+                              RenderStyleMode="@ButtonRenderStyleMode.Outline"
+                              CssClass="menu-button-nav"
+                              IconCssClass="bi bi-box-arrow-in-right"></DxButton>
                 </NavLink>
             </div>
         </NotAuthorized>
@@ -74,6 +74,10 @@
     {
         await ToggleSidebar.InvokeAsync(IsToggled);
     }
+    protected override async Task OnInitializedAsync()
+    {
+        sizeListener.Size += UpdateValue;
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -83,7 +87,6 @@
             username = user.Identity.Name;
 
             sizeListener.Init(_JS);
-            sizeListener.Size += UpdateValue;
         }
     }
     string registerButton { get; set; } = "Register";
@@ -93,7 +96,7 @@
 
     static string username { get; set; }
 
-    private void UpdateValue(object sender, bool isDesktop)
+    private async void UpdateValue(object? sender, bool isDesktop)
     {
         if (isDesktop)
         {
@@ -109,6 +112,6 @@
             userButton = string.Empty;
             logoutButton = string.Empty;
         }
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 }
